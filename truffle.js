@@ -1,6 +1,6 @@
 require("dotenv").config();
-const host = process.env.TRUFFLE_HOST || "127.0.0.1";
-const port = process.env.TRUFFLE_PORT || 8545;
+const host = process.env.RPC_HOST || "127.0.0.1";
+const port = process.env.RPC_PORT || 8545;
 
 module.exports = {
   networks: {
