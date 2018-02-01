@@ -1,16 +1,27 @@
 const webpack = require("webpack");
-const WebpackDevServer = require("webpack-dev-server");
+const express = require("express");
 require("dotenv").config();
+
 const config = require("./webpack.config");
 const port = process.env.PORT || 3000;
+const path = require("path");
 
-new WebpackDevServer(webpack(config), {
-  publicPath: config.output.publicPath,
-  hot: true,
-  historyApiFallback: true
-}).listen(port, "localhost", err => {
-  if (err) {
-    console.log(err);
-  }
-  console.log(`Listening at localhost:${port}`);
+const compiler = webpack(config);
+
+const app = express();
+
+app.use(
+  require("webpack-dev-middleware")(compiler, {
+    noInfo: true,
+    publicPath: config.output.publicPath
+  })
+);
+
+app.use(require("webpack-hot-middleware")(compiler));
+
+// Serve index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "/app/index.html"));
 });
+
+app.listen(port, () => console.log(`Listening at localhost:${port}`));

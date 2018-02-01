@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build":
-      "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
+    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
   },
   "author": "Paul Fletcher-Hill <pfletcherhill@gmail.com>",
   "license": "MIT",
@@ -14,13 +13,19 @@
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.20.0",
     "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
+    "mobx": "^3.4.1",
+    "mobx-react": "^4.3.5",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-router-dom": "^4.2.2",
     "truffle": "^4.0.5",
     "truffle-contract": "^3.0.2",
-    "web3": "^0.20.4"
+    "web3": "^0.20.4",
+    "webpack-dev-middleware": "^2.0.4",
+    "webpack-hot-middleware": "^2.21.0"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",

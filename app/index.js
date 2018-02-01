@@ -1,6 +1,7 @@
 import React from "react";
 import { render } from "react-dom";
 import App from "./components/App";
+import Store from "./store";
 import Web3 from "web3";
 
 window.addEventListener("load", () => {
@@ -13,5 +14,7 @@ window.addEventListener("load", () => {
     web3Provided = new Web3(new Web3.providers.HttpProvider(`${host}:${port}`));
   }
 
-  render(<App web3={web3Provided} />, document.getElementById("root"));
+  let store = new Store(web3Provided);
+
+  render(<App store={store} />, document.getElementById("root"));
 });

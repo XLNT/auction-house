@@ -1,13 +1,22 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import Home from "./Home";
+import { Provider } from "mobx-react";
+import Nav from "./Nav";
+import AuctionList from "./AuctionList";
+import Auction from "./Auction";
 
 export default class App extends Component {
   render() {
     return (
-      <Router>
-        <Route exact path="/" render={() => <Home web3={this.props.web3} />} />
-      </Router>
+      <Provider store={this.props.store}>
+        <Router>
+          <div>
+            <Nav />
+            <Route path="/auction/:auctionUid" component={Auction} />
+            <Route exact path="/" component={AuctionList} />
+          </div>
+        </Router>
+      </Provider>
     );
   }
 }

@@ -2,14 +2,11 @@ const webpack = require("webpack");
 const path = require("path");
 
 module.exports = {
-  entry: [
-    "webpack-dev-server/client?http://localhost:" + (process.env.PORT || 3000),
-    "webpack/hot/dev-server",
-    "./app/index"
-  ],
+  context: path.join(__dirname, "app"),
+  entry: ["./index.js", "webpack-hot-middleware/client"],
   output: {
-    path: __dirname,
     filename: "bundle.js",
+    path: __dirname,
     publicPath: "/static/"
   },
   resolve: {
