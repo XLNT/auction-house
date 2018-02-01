@@ -1,10 +1,9 @@
 const webpack = require("webpack");
 const path = require("path");
-const port = process.env.PORT || 3000;
 
 module.exports = {
   entry: [
-    "webpack-dev-server/client?http://localhost:" + port,
+    "webpack-dev-server/client?http://localhost:" + (process.env.PORT || 3000),
     "webpack/hot/dev-server",
     "./app/index"
   ],
@@ -19,7 +18,14 @@ module.exports = {
   devtool: "eval-source-map",
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoErrorsPlugin(),
+    new webpack.DefinePlugin({
+      "process.env": {
+        PORT: JSON.stringify(process.env.PORT),
+        RPC_HOST: JSON.stringify(process.env.RPC_HOST),
+        RPC_PORT: JSON.stringify(process.env.RPC_PORT)
+      }
+    })
   ],
   module: {
     loaders: [
@@ -33,8 +39,5 @@ module.exports = {
         loaders: ["json-loader"]
       }
     ]
-  },
-  node: {
-    fs: "empty"
   }
 };

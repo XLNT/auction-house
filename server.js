@@ -4,8 +4,6 @@ require("dotenv").config();
 const config = require("./webpack.config");
 const port = process.env.PORT || 3000;
 
-console.log("SERVER", config, process.env.PORT);
-
 new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
   hot: true,
