@@ -7,6 +7,5 @@ module.exports = {
       port: process.env.RPC_PORT || 8545,
       network_id: "*" // match any network
     }
-  },
-  migrations_directory: "./migrations"
+  }
 };
