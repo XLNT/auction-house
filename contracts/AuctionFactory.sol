@@ -16,7 +16,7 @@ contract AuctionFactory {
     return true;
   }
 
-  function getAuctions() public view returns (address[]) {
-    return auctions;
+  function getAuctions() public constant returns (address[], uint) {
+    return (auctions, block.number);
   }
 }

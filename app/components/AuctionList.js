@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { action, observable, runInAction } from "mobx";
+import { action, observable, autorun, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import AuctionFactory from "../../build/contracts/AuctionFactory.json";
@@ -8,19 +8,34 @@ import AuctionFactory from "../../build/contracts/AuctionFactory.json";
 @observer
 export default class AuctionList extends Component {
   @observable auctions = [];
-  @observable events = [];
+  @observable currentBlock;
 
   constructor(props) {
     super(props);
     this.auctionFactory = props.store.web3.eth
       .contract(AuctionFactory.abi)
-      .at("0x3d49d1ef2ade060a33c6e6aa213513a7ee9a6241".toLowerCase());
+      .at("0x565c2b576c2002d9bbea5bca0a4fd8bf0acab38b".toLowerCase());
     window.s = this;
   }
 
   componentDidMount() {
-    this.getAuctions();
-    //this.eventInterval = setInterval(() => this.getEvents(), 1000); // Ugh ಠ_ಠ
+    this.eventInterval = setInterval(() => {
+      this.props.store.web3.eth.getBlock(
+        "latest",
+        action((err, res) => {
+          if (res.number != this.currentBlock) {
+            console.log(
+              "Changing current block from",
+              this.currentBlock,
+              "to",
+              res.number
+            );
+            this.currentBlock = res.number;
+            this.getAuctions();
+          }
+        })
+      );
+    }, 1000); // Ugh ಠ_ಠ
   }
 
   componentWillUnmount() {
@@ -29,56 +44,32 @@ export default class AuctionList extends Component {
     }
   }
 
-  getEvents() {
-    const events = this.auctionFactory.allEvents({
-      fromBlock: 0,
-      toBlock: "latest"
-    });
-    events.get((err, res) => {
-      console.log("AUCTIONS!!", res);
-    });
-  }
-
   getAuctions() {
-    console.log("getAuctions");
     this.auctionFactory.getAuctions(
-      action((err, res) => {
-        this.auctions = res;
-      })
+      {},
+      this.currentBlock || "latest",
+      (err, res) => {
+        this.auctions = res[0];
+        console.log(
+          "getAuctions block number",
+          this.currentBlock,
+          res[1].toString()
+        );
+      }
     );
   }
 
   createAuction() {
     const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
-    const createPromise = new Promise((resolve, reject) => {
-      this.auctionFactory.createAuction(
-        bidIncrement,
-        { from: this.props.store.currentAccount },
-        (err, res) => {
-          const transactionHash = res;
-          console.log("Init transaction", transactionHash);
-          const interval = setInterval(() => {
-            this.props.store.web3.eth.getTransactionReceipt(
-              transactionHash,
-              (err, res) => {
-                console.log("res", res.status, res);
-                if (res && res.status == 1) {
-                  console.log("Resolve");
-                  clearInterval(interval);
-                  resolve();
-                } else {
-                  console.log("Go again?");
-                }
-              }
-            );
-          }, 500);
-        }
-      );
-    });
-    createPromise.then(data => {
-      console.log("THEN", data);
-      this.getAuctions();
-    });
+    this.auctionFactory.createAuction(
+      bidIncrement,
+      {
+        from: this.props.store.currentAccount
+      },
+      (err, res) => {
+        console.log("New auction transaction hash", res);
+      }
+    );
   }
 
   render() {
