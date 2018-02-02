@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { observable, action, autorun } from "mobx";
+import { observable, observe, action, autorun } from "mobx";
 import BigNumber from "bignumber.js";
 import AuctionContract from "../../build/contracts/Auction.json";
 
@@ -21,26 +21,45 @@ export default class Auction extends Component {
   }
 
   componentDidMount() {
-    autorun(() => {
-      this.getHighestBid();
-      this.getHighestBidder();
-      this.getCurrentAccountBid();
-      this.getBidIncrement();
-    });
+    this.getAuctionData();
+    const watcher = observe(this.props.store, "currentBlock", change =>
+      this.getAuctionData()
+    );
+  }
+
+  getAuctionData() {
+    this.getBidIncrement();
+    this.getHighestBid();
+    this.getHighestBidder();
+    this.getCurrentAccountBid();
+  }
+
+  getBidIncrement() {
+    this.auctionInstance.bidIncrement(
+      {},
+      this.props.store.currentBlock,
+      action((err, res) => {
+        this.bidIncrement = res;
+      })
+    );
   }
 
   getHighestBid() {
     this.auctionInstance.highestBid(
-      action((err, result) => {
-        this.highestBid = result;
+      {},
+      this.props.store.currentBlock,
+      action((err, res) => {
+        this.highestBid = res;
       })
     );
   }
 
   getHighestBidder() {
     this.auctionInstance.highestBidder(
-      action((err, result) => {
-        this.highestBidder = result;
+      {},
+      this.props.store.currentBlock,
+      action((err, res) => {
+        this.highestBidder = res;
       })
     );
   }
@@ -49,16 +68,10 @@ export default class Auction extends Component {
     if (!this.props.store.currentAccount) return false;
     this.auctionInstance.getBid(
       this.props.store.currentAccount,
+      {},
+      this.props.store.currentBlock,
       action((err, result) => {
         this.currentAccountBid = result;
-      })
-    );
-  }
-
-  getBidIncrement() {
-    this.auctionInstance.bidIncrement(
-      action((err, result) => {
-        this.bidIncrement = result;
       })
     );
   }

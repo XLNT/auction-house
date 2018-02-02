@@ -15,7 +15,7 @@ export default class Nav extends Component {
         <Link to="/">Auction List</Link>{" "}
         {this.currentAccount
           ? `Logged in as ${this.currentAccount}`
-          : `Not logged in`}
+          : `Not logged in`}, Current block: {this.props.store.currentBlock}
       </div>
     );
   }
