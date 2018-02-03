@@ -1,12 +1,29 @@
 const Web3 = require("web3");
+const contract = require("truffle-contract");
+const repl = require('repl');
+
 const AuctionContract = require("./build/contracts/AuctionFactory.json");
+const HillCoreContract = require("./build/contracts/HillCore.json");
 
 global.web3 = new Web3(
   new Web3.providers.HttpProvider("http://localhost:7545")
 );
 
-global.auctionFactory = web3.eth
-  .contract(AuctionContract.abi)
-  .at("0x3d49d1ef2ade060a33c6e6aa213513a7ee9a6241".toLowerCase());
+global.accounts = global.web3.eth.accounts;
+global.acct0 = global.accounts[0];
+global.acct1 = global.accounts[1];
 
-require("repl").start({});
+const AuctionFactory = contract(AuctionContract);
+AuctionFactory.setProvider(global.web3.currentProvider);
+
+const HillCore = contract(HillCoreContract);
+HillCore.setProvider(global.web3.currentProvider);
+
+Promise.all([
+  AuctionFactory.deployed(),
+  HillCore.deployed()
+]).then(([_auctionFactory, _hillCore]) => {
+  global.auctionFactory = _auctionFactory;
+  global.hillCore = _hillCore;
+  repl.start({});
+});
