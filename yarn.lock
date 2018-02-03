@@ -3410,14 +3410,19 @@ truffle-contract-schema@^1.0.0:
     ajv "^5.1.1"
     crypto-js "^3.1.9-1"
 
-truffle-contract@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/truffle-contract/-/truffle-contract-3.0.2.tgz#6c703e4872898d8329ab7e3c6e38cd65e6c45894"
+"truffle-contract@git+ssh://git@github.com/pfletcherhill/truffle-contract.git":
+  version "3.0.3"
+  resolved "git+ssh://git@github.com/pfletcherhill/truffle-contract.git#264228d70e4f0b58ac51c7b49e8be25b139b5e6c"
   dependencies:
     ethjs-abi "0.1.8"
     truffle-blockchain-utils "^0.0.3"
     truffle-contract-schema "^1.0.0"
+    truffle-error "0.0.2"
     web3 "^0.20.1"
+
+truffle-error@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/truffle-error/-/truffle-error-0.0.2.tgz#01b189b78505566ae1689c239c7ca2dd121cfe4c"
 
 truffle@^4.0.5:
   version "4.0.5"
