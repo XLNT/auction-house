@@ -65,7 +65,7 @@ contract HillBase is HillAccessControl {
     /// @param _latitude The hills latitude
     /// @param _longitude The hills longitude
     /// @param _owner The inital owner of this hill, must be non-zero
-    function _createKitty(
+    function _createHill(
         uint256 _elevation,
         uint256 _latitude,
         uint256 _longitude,
@@ -77,7 +77,7 @@ contract HillBase is HillAccessControl {
         Hill memory _hill = Hill({
             elevation: _elevation,
             latitude: _latitude,
-            longitude: _longitude,
+            longitude: _longitude
         });
         uint256 newHillId = hills.push(_hill) - 1;
 
