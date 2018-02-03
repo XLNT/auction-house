@@ -1,14 +1,23 @@
 import { action, observable } from "mobx";
 import contract from "truffle-contract";
+import AuctionContract from "../../build/contracts/Auction.json";
+import AuctionFactoryContract from "../../build/contracts/AuctionFactory.json";
 
 export default class Store {
-  @observable currentAccount;
+  @observable currentAccount = null;
   @observable currentBlock = "latest";
 
   constructor(web3) {
     this.web3 = web3;
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
+    // Setup Auction contract
+    this.Auction = contract(AuctionContract);
+    this.Auction.setProvider(this.web3.currentProvider);
+    // Setup AuctionFactory contract
+    this.AuctionFactory = contract(AuctionFactoryContract);
+    this.AuctionFactory.setProvider(this.web3.currentProvider);
+    window.s = this;
   }
 
   setCurrentAccount() {
