@@ -25,5 +25,12 @@ Promise.all([
 ]).then(([_auctionFactory, _hillCore]) => {
   global.auctionFactory = _auctionFactory;
   global.hillCore = _hillCore;
+
+  global.hillCore.unpause({from: acct0});
+}).then((unpauseResponse) => {
+  global.hillCore.createPromoHill(1, 1, 1, acct1, {from: acct0, gas: 1000000})
+}).then((promoHill) => {
   repl.start({});
+}).catch((error) => {
+  console.log("ERROR : ", error);
 });
