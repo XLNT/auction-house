@@ -31,3 +31,18 @@ Install packages and start server (I prefer using [yarn](https://yarnpkg.com/en/
 yarn
 yarn start
 ```
+
+To add an ERC721 CryptoHill to account index 1 on ganache, run :
+
+```
+node script.js
+```
+
+This will add one CryptoHill, and open up a repl. You can add more hills by running this command in the repl:
+
+```
+hillCore.createPromoHill(1, 1, 1, acct1, {
+  from: acct0,
+  gas: 1000000
+});
+```
