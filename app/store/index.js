@@ -1,7 +1,6 @@
 import { action, observable } from "mobx";
 import contract from "truffle-contract";
-import AuctionContract from "../../build/contracts/Auction.json";
-import AuctionFactoryContract from "../../build/contracts/AuctionFactory.json";
+import AuctionBaseContract from "../../build/contracts/AuctionBase.json";
 import HillCoreContract from "../../build/contracts/HillCore.json";
 
 export default class Store {
@@ -12,12 +11,9 @@ export default class Store {
     this.web3 = web3;
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
-    // Setup Auction contract
-    this.Auction = contract(AuctionContract);
-    this.Auction.setProvider(this.web3.currentProvider);
-    // Setup AuctionFactory contract
-    this.AuctionFactory = contract(AuctionFactoryContract);
-    this.AuctionFactory.setProvider(this.web3.currentProvider);
+    // Setup AuctionBase contract
+    this.AuctionBase = contract(AuctionBaseContract);
+    this.AuctionBase.setProvider(this.web3.currentProvider);
 
     // Setup CryptoHills contract
     this.HillCore = contract(HillCoreContract);
