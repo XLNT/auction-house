@@ -30,16 +30,35 @@ export default class AuctionList extends Component {
     const { currentBlock, currentAccount } = this.props.store;
     if (this.auctionsLength == 0) return false;
     const promises = [];
-    for (let i = 1; i <= this.auctionsLength; i++) {
-      promises.push(
-        this.auctionBase
-          .getAuction(i, { from: currentAccount }, currentBlock)
-          .then(res => {
-            return res;
-          })
-      );
+    for (let i = 0; i < this.auctionsLength; i++) {
+      promises.push(this.importAuction(i, currentBlock));
     }
     this.auctions = await Promise.all(promises);
+  }
+
+  async importAuction(_id, currentBlock) {
+    const [
+      id,
+      nftAddress,
+      tokenId,
+      seller,
+      bidIncrement,
+      duration,
+      startedAt,
+      highestBid,
+      highestBidder
+    ] = await this.auctionBase.getAuction(_id, currentBlock);
+    return {
+      id,
+      nftAddress,
+      tokenId,
+      seller,
+      bidIncrement,
+      duration,
+      startedAt,
+      highestBid,
+      highestBidder
+    };
   }
 
   async createAuction() {
@@ -56,8 +75,10 @@ export default class AuctionList extends Component {
         <h1>Auctions ({this.auctionsLength.toString()} total)</h1>
         <ul>
           {this.auctions.map(auction => (
-            <li key={auction}>
-              <Link to={`/auction/${auction}`}>{auction}</Link>
+            <li key={auction.id.toString()}>
+              <Link to={`/auction/${auction.id.toString()}`}>
+                {JSON.stringify(auction)}
+              </Link>
             </li>
           ))}
         </ul>

@@ -51,8 +51,8 @@ contract AuctionBase is Pausable {
     return auctions.length;
   }
 
-  /// @dev Returns auction info for an NFT on auction.
-  /// @param _id - auction index
+  // @dev Returns auction info for an NFT on auction.
+  // @param _id - auction index
   function getAuction(uint256 _id)
     public
     view

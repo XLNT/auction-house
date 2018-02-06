@@ -7,6 +7,7 @@ import BigNumber from "bignumber.js";
 @observer
 export default class Account extends Component {
   @observable cryptoHills = [];
+  @observable loadingHills = false;
   @observable cryptoHillsBalance = new BigNumber(0);
 
   async componentDidMount() {
@@ -22,16 +23,12 @@ export default class Account extends Component {
     });
   }
 
+  @action
   async getCryptoHills() {
     const { currentAccount, currentBlock } = this.props.store;
-    console.log(
-      "getCryptoHills",
-      currentAccount,
-      currentBlock,
-      this.cryptoHillsBalance
-    );
-    if (!currentAccount) return false;
-    if (this.cryptoHillsBalance == 0) return false;
+    this.loadingHills = true;
+    this.cryptoHills = [];
+    if (!currentAccount || this.cryptoHillsBalance == 0) return false;
     const promises = [];
     for (let i = 0; i < this.cryptoHillsBalance; i++) {
       promises.push(
