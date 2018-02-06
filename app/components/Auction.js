@@ -3,6 +3,8 @@ import { inject, observer } from "mobx-react";
 import { observable, observe, action, autorun, computed } from "mobx";
 import BigNumber from "bignumber.js";
 
+// TODO use AuctionBase instead of separate Auction contracts
+
 @inject("store")
 @observer
 export default class Auction extends Component {
@@ -26,17 +28,13 @@ export default class Auction extends Component {
       this.bidIncrement,
       this.highestBid,
       this.highestBidder,
-      this.currentAccountBid,
+      this.currentAccountBid
     ] = await Promise.all([
       this.auction.bidIncrement({}, currentBlock),
       this.auction.highestBid({}, currentBlock),
       this.auction.highestBidder({}, currentBlock),
-      this.auction.getBid(
-        currentAccount,
-        {},
-        currentBlock
-      ),
-    ])
+      this.auction.getBid(currentAccount, {}, currentBlock)
+    ]);
   }
 
   async placeBid(bigNumber) {

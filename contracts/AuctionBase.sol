@@ -68,7 +68,7 @@ contract AuctionBase is Pausable {
     uint256 highestBid,
     address highestBidder
   ) {
-    Auction auction = auctions[_id];
+    Auction storage auction = auctions[_id];
     require(_isActive(auction));
     return (
       _id,
@@ -83,11 +83,11 @@ contract AuctionBase is Pausable {
     );
   }
 
-  /// @dev Transfer all balance from the contract to the owner
-  function withdrawBalance() external {
-    require(msg.sender == owner);
-    msg.sender.transfer(this.balance);
-  }
+  /// TODO
+  // function withdrawBalance() external {
+  //   require(msg.sender == owner);
+  //   msg.sender.transfer(this.balance);
+  // }
 
   /// @dev Creates and begins a new auction.
   function createAuction(
@@ -106,6 +106,7 @@ contract AuctionBase is Pausable {
     require(nftContract.ownerOf(_tokenId) == msg.sender);
 
     // Require duration to be at least a minute
+    // TODO
     // require(_duration >= 1 minutes);
 
     // Put nft in escrow

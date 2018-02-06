@@ -65,7 +65,7 @@ export default class Account extends Component {
 
   approveTransfer(id, currentAccount) {
     this.hillCoreInstance
-      .approve(this.auction.address, 1, {
+      .approve(this.auction.address, id, {
         from: currentAccount
       })
       .then(res => {
