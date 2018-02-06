@@ -1,10 +1,9 @@
 pragma solidity ^0.4.18;
 
-// Auction wrapper functions
-import "./HillBase.sol";
+import "./CryptoHillsOwnership.sol";
 
-/// @title all functions related to creating kittens
-contract HillMinting is HillBase {
+/// @title all functions related to creating hills
+contract HillMinting is CryptoHillsOwnership {
 
     // Limits the number of hills the contract owner can ever create.
     uint256 public promoCreationLimit = 5000;
@@ -22,7 +21,7 @@ contract HillMinting is HillBase {
     /// @param _elevation The hills elevation
     /// @param _latitude The hills latitude
     /// @param _longitude The hills longitude
-    /// @param _owner the future owner of the created kittens. Default to contract COO
+    /// @param _owner the future owner of the created hills. Default to contract COO
     function createPromoHill(uint256 _elevation, uint256 _latitude, uint256 _longitude, address _owner) public onlyCOO {
         if (_owner == address(0)) {
              _owner = cooAddress;
