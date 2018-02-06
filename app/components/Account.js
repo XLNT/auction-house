@@ -11,6 +11,9 @@ export default class Account extends Component {
 
   async componentDidMount() {
     this.hillCoreInstance = await this.props.store.HillCore.deployed();
+    this.auction = await this.props.store.AuctionBase.deployed();
+    window.s = this;
+    this.getCryptoHillsBalance();
     const blockWatcher = observe(this.props.store, "currentBlock", change => {
       this.getCryptoHillsBalance();
     });
@@ -44,12 +47,6 @@ export default class Account extends Component {
 
   async getCryptoHillsBalance() {
     const { currentAccount, currentBlock } = this.props.store;
-    console.log(
-      "getCryptoHillsBalance",
-      currentAccount,
-      currentBlock,
-      this.cryptoHillsBalance
-    );
     if (!currentAccount) return false;
     this.cryptoHillsBalance = await this.hillCoreInstance.balanceOf(
       currentAccount,
@@ -66,6 +63,27 @@ export default class Account extends Component {
     return { elevation, latitude, longitude, id };
   }
 
+  approveTransfer(id, currentAccount) {
+    this.hillCoreInstance
+      .approve(this.auction.address, 1, {
+        from: currentAccount
+      })
+      .then(res => {
+        console.log(res);
+      });
+  }
+
+  createAuction(id, currentAccount) {
+    const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
+    this.auction
+      .createAuction(this.hillCoreInstance.address, id, bidIncrement, 1000, {
+        from: currentAccount
+      })
+      .then(res => {
+        console.log(res);
+      });
+  }
+
   render() {
     const { currentAccount } = this.props.store;
     return (
@@ -76,7 +94,19 @@ export default class Account extends Component {
         </div>
         <ul>
           {this.cryptoHills.map(hill => (
-            <li key={hill.id.toString()}>{JSON.stringify(hill)}</li>
+            <li key={hill.id.toString()}>
+              {JSON.stringify(hill)}{" "}
+              <button
+                onClick={() => this.approveTransfer(hill.id, currentAccount)}
+              >
+                Approve Transfer
+              </button>
+              <button
+                onClick={() => this.createAuction(hill.id, currentAccount)}
+              >
+                Create Auction
+              </button>
+            </li>
           ))}
         </ul>
       </div>

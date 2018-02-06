@@ -46,6 +46,43 @@ contract AuctionBase is Pausable {
   /// @dev DON'T give me your money.
   function() external {}
 
+  // @dev Retrieve auctions count
+  function getAuctionsCount() public view returns (uint256) {
+    return auctions.length;
+  }
+
+  /// @dev Returns auction info for an NFT on auction.
+  /// @param _id - auction index
+  function getAuction(uint256 _id)
+    public
+    view
+    returns
+  (
+    uint256 id,
+    address nftAddress,
+    uint256 tokenId,
+    address seller,
+    uint256 bidIncrement,
+    uint64 duration,
+    uint64 startedAt,
+    uint256 highestBid,
+    address highestBidder
+  ) {
+    Auction auction = auctions[_id];
+    require(_isActive(auction));
+    return (
+      _id,
+      auction.nftAddress,
+      auction.tokenId,
+      auction.seller,
+      auction.bidIncrement,
+      auction.duration,
+      auction.startedAt,
+      auction.highestBid,
+      auction.highestBidder
+    );
+  }
+
   /// @dev Transfer all balance from the contract to the owner
   function withdrawBalance() external {
     require(msg.sender == owner);
@@ -138,15 +175,7 @@ contract AuctionBase is Pausable {
   function cancelAuction(uint256 _id) external {
     _cancelAuction(_id);
   }
-
-  function getAuction(address _nftAddress, uint256 _tokenId) public view {
-    uint256 auctionId = nftToTokenIdToAuctionId[_nftAddress][_tokenId];
-    _getAuction(auctionId);
-  }
-
-  function getAuction(uint256 _id) public view {
-    _getAuction(_id);
-  }
+  
 
   /// @dev Transfers an NFT owned by this contract to another address.
   /// Returns true if the transfer succeeds.
@@ -179,38 +208,6 @@ contract AuctionBase is Pausable {
   /// @param _auction - Auction to check.
   function _isActive(Auction storage _auction) internal view returns (bool) {
     return (_auction.startedAt > 0);
-  }
-
-  /// @dev Returns auction info for an NFT on auction.
-  /// @param _id - auction index
-  function _getAuction(uint256 _id)
-    internal
-    view
-    returns
-  (
-    uint256 id,
-    address nftAddress,
-    uint256 tokenId,
-    address seller,
-    uint256 bidIncrement,
-    uint64 duration,
-    uint64 startedAt,
-    uint256 highestBid,
-    address highestBidder
-  ) {
-    Auction storage auction = auctions[_id];
-    require(_isActive(auction));
-    return (
-      _id,
-      auction.nftAddress,
-      auction.tokenId,
-      auction.seller,
-      auction.bidIncrement,
-      auction.duration,
-      auction.startedAt,
-      auction.highestBid,
-      auction.highestBidder
-    );
   }
 
 }

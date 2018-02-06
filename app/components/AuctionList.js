@@ -2,25 +2,44 @@ import React, { Component } from "react";
 import { action, observable, observe, autorun, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
+import BigNumber from "bignumber.js";
 
 @inject("store")
 @observer
 export default class AuctionList extends Component {
   @observable auctions = [];
+  @observable auctionsLength = new BigNumber(0);
 
   async componentDidMount() {
-    this.auctionFactory = await this.props.store.AuctionFactory.deployed();
-    this.getAuctions();
-    const watcher = observe(this.props.store, "currentBlock", change => {
+    this.auctionBase = await this.props.store.AuctionBase.deployed();
+    autorun(() => this.getAuctionsLength());
+    window.s = this;
+    const watcher = observe(this, "auctionsLength", change => {
       this.getAuctions();
     });
   }
 
-  async getAuctions() {
-    this.auctions = await this.auctionFactory.getAuctions(
+  async getAuctionsLength() {
+    this.auctionsLength = await this.auctionBase.getAuctionsCount(
       {},
       this.props.store.currentBlock
     );
+  }
+
+  async getAuctions() {
+    const { currentBlock, currentAccount } = this.props.store;
+    if (this.auctionsLength == 0) return false;
+    const promises = [];
+    for (let i = 1; i <= this.auctionsLength; i++) {
+      promises.push(
+        this.auctionBase
+          .getAuction(i, { from: currentAccount }, currentBlock)
+          .then(res => {
+            return res;
+          })
+      );
+    }
+    this.auctions = await Promise.all(promises);
   }
 
   async createAuction() {
@@ -34,7 +53,7 @@ export default class AuctionList extends Component {
   render() {
     return (
       <div>
-        <h1>Auctions ({this.auctions.length} total)</h1>
+        <h1>Auctions ({this.auctionsLength.toString()} total)</h1>
         <ul>
           {this.auctions.map(auction => (
             <li key={auction}>
