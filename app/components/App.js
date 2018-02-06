@@ -14,7 +14,7 @@ export default class App extends Component {
           <div>
             <Nav />
             <Route path="/account" component={Account} />
-            <Route path="/auction/:auctionUid" component={Auction} />
+            <Route path="/auction/:auctionId" component={Auction} />
             <Route exact path="/" component={AuctionList} />
           </div>
         </Router>

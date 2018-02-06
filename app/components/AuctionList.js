@@ -13,7 +13,6 @@ export default class AuctionList extends Component {
   async componentDidMount() {
     this.auctionBase = await this.props.store.AuctionBase.deployed();
     autorun(() => this.getAuctionsLength());
-    window.s = this;
     const watcher = observe(this, "auctionsLength", change => {
       this.getAuctions();
     });
