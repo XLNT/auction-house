@@ -69,7 +69,8 @@ export default class AuctionList extends Component {
             <li key={auction.id.toString()}>
               <Link to={`/auction/${auction.id.toString()}`}>
                 <b>Auction {auction.id.toString()}</b> selling NFT{" "}
-                {auction.tokenId.toString()} from contract {auction.nftAddress}
+                {auction.tokenId.toString()} from contract {auction.nftAddress}{" "}
+                with current highest bid: {auction.highestBid.toString()}
               </Link>
             </li>
           ))}
