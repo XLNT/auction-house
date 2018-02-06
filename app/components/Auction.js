@@ -15,12 +15,15 @@ export default class Auction extends Component {
   async componentDidMount() {
     this.auctionBase = await this.props.store.AuctionBase.deployed();
     const { auctionId } = this.props.match.params;
-    this.getAuction(auctionId);
-    this.getCurrentAccountBid(auctionId);
-    const watcher = observe(this.props.store, "currentBlock", change => {
-      this.getAuction(auctionId);
-      this.getCurrentAccountBid(auctionId);
-    });
+    const watcher = observe(
+      this.props.store,
+      "currentBlock",
+      change => {
+        this.getAuction(auctionId);
+        this.getCurrentAccountBid(auctionId);
+      },
+      true
+    ); // invoke immediately
   }
 
   @action
@@ -77,7 +80,6 @@ export default class Auction extends Component {
 
   @computed
   get nextMinBid() {
-    console.log("nextMinBid", this.auction);
     if (!this.auction) return false;
     const { highestBid, bidIncrement } = this.auction;
     return highestBid.plus(bidIncrement).minus(this.currentAccountBid);
