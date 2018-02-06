@@ -13,7 +13,6 @@ export default class AuctionList extends Component {
   async componentDidMount() {
     this.auctionBase = await this.props.store.AuctionBase.deployed();
     autorun(() => this.getAuctionsLength());
-    window.s = this;
     const watcher = observe(this, "auctionsLength", change => {
       this.getAuctions();
     });
@@ -61,14 +60,6 @@ export default class AuctionList extends Component {
     };
   }
 
-  async createAuction() {
-    const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
-    const receipt = await this.auctionFactory.createAuction(bidIncrement, {
-      from: this.props.store.currentAccount
-    });
-    console.log("New auction transaction", receipt);
-  }
-
   render() {
     return (
       <div>
@@ -77,12 +68,12 @@ export default class AuctionList extends Component {
           {this.auctions.map(auction => (
             <li key={auction.id.toString()}>
               <Link to={`/auction/${auction.id.toString()}`}>
-                {JSON.stringify(auction)}
+                <b>Auction {auction.id.toString()}</b> selling NFT{" "}
+                {auction.tokenId.toString()} from contract {auction.nftAddress}
               </Link>
             </li>
           ))}
         </ul>
-        <button onClick={() => this.createAuction()}>Create Auction</button>
       </div>
     );
   }

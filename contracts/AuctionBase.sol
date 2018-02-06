@@ -54,7 +54,7 @@ contract AuctionBase is Pausable {
   // @dev Returns auction info for an NFT on auction.
   // @param _id - auction index
   function getAuction(uint256 _id)
-    public
+    external
     view
     returns
   (
@@ -81,6 +81,14 @@ contract AuctionBase is Pausable {
       auction.highestBid,
       auction.highestBidder
     );
+  }
+
+  // @dev Return bid for given auction ID and bidder
+  function getBid(uint256 _id, address bidder) external view returns (uint256 bid) {
+    Auction storage auction = auctions[_id];
+    require(_isActive(auction));
+    if (auction.highestBidder == bidder) return auction.highestBid;
+    return auction.allowed[bidder];
   }
 
   /// TODO

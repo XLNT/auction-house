@@ -9,32 +9,52 @@ import BigNumber from "bignumber.js";
 @observer
 export default class Auction extends Component {
   @observable auction;
-  @observable highestBidder;
-  @observable highestBid = new BigNumber(0);
+  @observable loadingAuction = true;
   @observable currentAccountBid = new BigNumber(0);
-  @observable bidIncrement = new BigNumber(0);
 
   async componentDidMount() {
-    this.auction = await this.props.store.Auction.at(
-      this.props.match.params.auctionUid
-    );
-    autorun(() => this.getAuctionData());
+    this.auctionBase = await this.props.store.AuctionBase.deployed();
+    const { auctionId } = this.props.match.params;
+    this.getAuction(auctionId);
+    const bidWatcher = observe(this, "auction", change => {
+      this.getCurrentAccountBid(auctionId);
+    });
   }
 
-  async getAuctionData() {
+  @action
+  async getAuction(_id) {
+    this.loadingAuction = true;
     const { currentBlock, currentAccount } = this.props.store;
-    console.log("getAuctionData", currentBlock, currentAccount);
-    [
-      this.bidIncrement,
-      this.highestBid,
-      this.highestBidder,
-      this.currentAccountBid
-    ] = await Promise.all([
-      this.auction.bidIncrement({}, currentBlock),
-      this.auction.highestBid({}, currentBlock),
-      this.auction.highestBidder({}, currentBlock),
-      this.auction.getBid(currentAccount, {}, currentBlock)
-    ]);
+    const [
+      id,
+      nftAddress,
+      tokenId,
+      seller,
+      bidIncrement,
+      duration,
+      startedAt,
+      highestBid,
+      highestBidder
+    ] = await this.auctionBase.getAuction(_id, currentBlock);
+    this.auction = {
+      id,
+      nftAddress,
+      tokenId,
+      seller,
+      bidIncrement,
+      duration,
+      startedAt,
+      highestBid,
+      highestBidder
+    };
+    this.loadingAuction = false;
+  }
+
+  @action
+  async getCurrentAccountBid(_id) {
+    const { currentBlock, currentAccount } = this.props.store;
+    this.currentAccountBid = await this.auctionBase.getBid(_id, currentBlock);
+    console.log("currentAccount", this.currentAccountBid);
   }
 
   async placeBid(bigNumber) {
@@ -53,14 +73,29 @@ export default class Auction extends Component {
   }
 
   render() {
-    if (!this.auction) return <div>Loading...</div>;
+    if (this.loadingAuction) return <div>Loading...</div>;
+    const {
+      id,
+      nftAddress,
+      tokenId,
+      seller,
+      bidIncrement,
+      duration,
+      startedAt,
+      highestBid,
+      highestBidder
+    } = this.auction;
     return (
       <div>
-        <h1>Auction {this.auction.address}</h1>
-        <div>Highest bid: {this.highestBid.toString()}</div>
-        <div>
-          Highest bidder: {this.highestBidder ? this.highestBidder : "None"}
-        </div>
+        <h1>Auction {id.toString()}</h1>
+        <div>NFT address: {nftAddress}</div>
+        <div>Token ID: {tokenId.toString()}</div>
+        <div>Seller: {seller}</div>
+        <div>Bid increment (in Wei): {bidIncrement.toString()}</div>
+        <div>Duration: {duration.toString()}</div>
+        <div>Started at: {startedAt.toString()}</div>
+        <div>Highest bid: {highestBid.toString()}</div>
+        <div>Highest bidder: {highestBidder ? highestBidder : "None"}</div>
         <div>Your bid: {this.currentAccountBid.toString()}</div>
         <button onClick={() => this.placeBid(this.nextMinBid)}>
           Place Bid!!
