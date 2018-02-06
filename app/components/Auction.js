@@ -16,7 +16,9 @@ export default class Auction extends Component {
     this.auctionBase = await this.props.store.AuctionBase.deployed();
     const { auctionId } = this.props.match.params;
     this.getAuction(auctionId);
-    const bidWatcher = observe(this, "auction", change => {
+    this.getCurrentAccountBid(auctionId);
+    const watcher = observe(this.props.store, "currentBlock", change => {
+      this.getAuction(auctionId);
       this.getCurrentAccountBid(auctionId);
     });
   }
@@ -24,7 +26,7 @@ export default class Auction extends Component {
   @action
   async getAuction(_id) {
     this.loadingAuction = true;
-    const { currentBlock, currentAccount } = this.props.store;
+    const { currentBlock } = this.props.store;
     const [
       id,
       nftAddress,
@@ -35,7 +37,7 @@ export default class Auction extends Component {
       startedAt,
       highestBid,
       highestBidder
-    ] = await this.auctionBase.getAuction(_id, currentBlock);
+    ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
     this.auction = {
       id,
       nftAddress,
@@ -52,9 +54,17 @@ export default class Auction extends Component {
 
   @action
   async getCurrentAccountBid(_id) {
-    const { currentBlock, currentAccount } = this.props.store;
-    this.currentAccountBid = await this.auctionBase.getBid(_id, currentBlock);
-    console.log("currentAccount", this.currentAccountBid);
+    const { currentAccount, currentBlock } = this.props.store;
+    if (!currentAccount) {
+      this.currentAccountBid = new BigNumber(0);
+      return false;
+    }
+    this.currentAccountBid = await this.auctionBase.getBid(
+      _id,
+      currentAccount,
+      {},
+      currentBlock
+    );
   }
 
   async placeBid(bigNumber) {
@@ -62,14 +72,15 @@ export default class Auction extends Component {
       from: this.props.store.currentAccount,
       value: bigNumber
     };
-    const receipt = await this.auction.bid(params);
+    const receipt = await this.auctionBase.bid(this.auction.id, params);
   }
 
   @computed
   get nextMinBid() {
-    return this.highestBid
-      .plus(this.bidIncrement)
-      .minus(this.currentAccountBid);
+    console.log("nextMinBid", this.auction);
+    if (!this.auction) return false;
+    const { highestBid, bidIncrement } = this.auction;
+    return highestBid.plus(bidIncrement).minus(this.currentAccountBid);
   }
 
   render() {
@@ -85,6 +96,7 @@ export default class Auction extends Component {
       highestBid,
       highestBidder
     } = this.auction;
+
     return (
       <div>
         <h1>Auction {id.toString()}</h1>

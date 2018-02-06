@@ -86,7 +86,7 @@ contract AuctionBase is Pausable {
   // @dev Return bid for given auction ID and bidder
   function getBid(uint256 _id, address bidder) external view returns (uint256 bid) {
     Auction storage auction = auctions[_id];
-    require(_isActive(auction));
+    // require(_isActive(auction));
     if (auction.highestBidder == bidder) return auction.highestBid;
     return auction.allowed[bidder];
   }
@@ -162,7 +162,7 @@ contract AuctionBase is Pausable {
     // Require newBid be more than highestBid
     require(newBid > auction.highestBid);
 
-    // Update allowed
+    // Update allowed mapping
     if (auction.highestBidder != msg.sender) {
       auction.allowed[auction.highestBidder] = auction.highestBid;
       auction.allowed[msg.sender] = 0;
