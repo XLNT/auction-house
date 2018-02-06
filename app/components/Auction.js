@@ -22,14 +22,21 @@ export default class Auction extends Component {
   async getAuctionData() {
     const { currentBlock, currentAccount } = this.props.store;
     console.log("getAuctionData", currentBlock, currentAccount);
-    this.bidIncrement = await this.auction.bidIncrement({}, currentBlock);
-    this.highestBid = await this.auction.highestBid({}, currentBlock);
-    this.highestBidder = await this.auction.highestBidder({}, currentBlock);
-    this.currentAccountBid = await this.auction.getBid(
-      currentAccount,
-      {},
-      currentBlock
-    );
+    [
+      this.bidIncrement,
+      this.highestBid,
+      this.highestBidder,
+      this.currentAccountBid,
+    ] = await Promise.all([
+      this.auction.bidIncrement({}, currentBlock),
+      this.auction.highestBid({}, currentBlock),
+      this.auction.highestBidder({}, currentBlock),
+      this.auction.getBid(
+        currentAccount,
+        {},
+        currentBlock
+      ),
+    ])
   }
 
   async placeBid(bigNumber) {

@@ -70,7 +70,7 @@ contract HillCore is HillMinting {
         returns (
         uint256 elevation,
         uint256 latitude,
-        uint256 longitude,
+        uint256 longitude
     ) {
         Hill storage hil = hills[_id];
 
