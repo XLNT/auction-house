@@ -1,14 +1,12 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 import 'eip820/contracts/InterfaceImplementationRegistry.sol';
 import 'eip820/contracts/EIP820.sol';
 
+import '../SafeMath.sol';
 import './AssetRegistryStorage.sol';
-
 import './IAssetRegistry.sol';
-
 import './IAssetHolder.sol';
 
 contract StandardAssetRegistry is AssetRegistryStorage, IAssetRegistry, EIP820 {
