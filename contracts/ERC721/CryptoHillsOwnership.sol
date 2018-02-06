@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import "./HillBase.sol";
-import "./ERC721Draft.sol";
+import "./ERC721.sol";
 
 /// @title The facet of the CryptoHills core contract that manages ownership, ERC-721 (draft) compliant.
 /// @author Hill St Labs
