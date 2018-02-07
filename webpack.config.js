@@ -2,15 +2,21 @@ const webpack = require("webpack");
 const path = require("path");
 
 module.exports = {
-  context: path.join(__dirname, "app"),
-  entry: ["babel-polyfill", "./index.js", "webpack-hot-middleware/client"],
+  context: __dirname,
+  entry: [
+    "babel-polyfill",
+    "react-hot-loader/patch",
+    "./app/index.js",
+    "webpack-hot-middleware/client"
+  ],
   output: {
     filename: "bundle.js",
     path: __dirname,
-    publicPath: "/static/"
+    publicPath: "/"
   },
   devtool: "eval-source-map",
   plugins: [
+    new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
