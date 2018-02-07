@@ -99,7 +99,7 @@ contract AuctionBase is Pausable {
     require(nftContract.ownerOf(_tokenId) == msg.sender);
 
     // Require duration to be at least a minute
-    require(_duration >= 1 minutes);
+    require(_duration >= 60);
 
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
