@@ -51,11 +51,11 @@ contract AuctionBase is Pausable {
     uint256 bidIncrement,
     uint64 duration,
     uint64 startedAt,
+    bool isActive,
     uint256 highestBid,
     address highestBidder
   ) {
     Auction storage auction = auctions[_id];
-    require(_isActive(auction));
     return (
       _id,
       auction.nftAddress,
@@ -64,6 +64,7 @@ contract AuctionBase is Pausable {
       auction.bidIncrement,
       auction.duration,
       auction.startedAt,
+      _isActive(auction),
       auction.highestBid,
       auction.highestBidder
     );

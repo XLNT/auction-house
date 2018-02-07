@@ -3,6 +3,7 @@ import { render } from "react-dom";
 import App from "./components/App";
 import Store from "./store";
 import Web3 from "web3";
+import "./styles/global";
 
 window.addEventListener("load", () => {
   var web3Provided;
