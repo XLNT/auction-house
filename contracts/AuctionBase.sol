@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
-import "./ERC721/ERC721.sol";
-import "./Pausable.sol";
+import "./erc721/ERC721.sol";
+import "./utils/Pausable.sol";
 
 /// @title AuctionBase
 /// @dev Contains models, variables, and internal methods for the auction.
@@ -9,42 +9,27 @@ contract AuctionBase is Pausable {
 
   struct Auction {
     // static
-    // NFT address
-    address nftAddress;
-    // ID of the nft
-    uint256 tokenId;
-    // Current owner of NFT
-    address seller;
-    // Minimum bid increment (in Wei)
-    uint128 bidIncrement;
-    // Duration (in seconds) of auction
-    uint64 duration;
-    // Time when auction started
-    // NOTE: 0 if this auction has been concluded
-    uint64 startedAt;
+    address nftAddress; // NFT address
+    uint256 tokenId; // ID of the nft
+    address seller; // Current owner of NFT
+    uint128 bidIncrement; // Minimum bid increment (in Wei)
+    uint64 duration; // Duration (in seconds) of auction
+    uint64 startedAt; // Time when auction started (0 if auction is concluded)
 
     // state
-    // Mapping of addresses to balance available to withdraw
-    mapping (address => uint256) allowed;
-    // Current highest bid
-    uint256 highestBid;
-    // Address of current highest bidder
-    address highestBidder;
+    mapping (address => uint256) allowed; // Mapping of addresses to balance to withdraw
+    uint256 highestBid; // Current highest bid
+    address highestBidder; // Address of current highest bidder
   }
 
   // Map from token ID to their corresponding auction ID.
   mapping (address => mapping(uint256 => uint256)) nftToTokenIdToAuctionId;
-
-  // Array of auctions
   Auction[] public auctions;
 
   event AuctionCreated(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionSuccessful(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionCancelled(uint256 id, address nftAddress, uint256 tokenId);
   event BidCreated(uint256 id, address nftAddress, uint256 tokenId, address bidder, uint256 bid);
-
-  /// @dev DON'T give me your money.
-  function() external {}
 
   // @dev Retrieve auctions count
   function getAuctionsCount() public view returns (uint256) {
@@ -140,11 +125,7 @@ contract AuctionBase is Pausable {
     AuctionCreated(newAuctionId, _nftAddress, _tokenId);
   }
 
-  function bid(uint256 _id)
-    external
-    payable
-    whenNotPaused
-  {
+  function bid(uint256 _id) external payable whenNotPaused {
     require(msg.value > 0);
 
     // Get auction from _id
@@ -173,9 +154,7 @@ contract AuctionBase is Pausable {
     BidCreated(_id, auction.nftAddress, auction.tokenId, msg.sender, newBid);
   }
 
-  function cancelAuction(address _nftAddress, uint256 _tokenId)
-    external
-  {
+  function cancelAuction(address _nftAddress, uint256 _tokenId) external {
     uint256 auctionId = nftToTokenIdToAuctionId[_nftAddress][_tokenId];
     _cancelAuction(auctionId);
   }
@@ -183,7 +162,6 @@ contract AuctionBase is Pausable {
   function cancelAuction(uint256 _id) external {
     _cancelAuction(_id);
   }
-  
 
   /// @dev Transfers an NFT owned by this contract to another address.
   /// Returns true if the transfer succeeds.
@@ -218,4 +196,8 @@ contract AuctionBase is Pausable {
     return (_auction.startedAt > 0);
   }
 
+  /// @dev Reject all Ether from being sent here
+  function() external payable {
+    revert();
+  }
 }
