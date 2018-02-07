@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { observable, observe, action, autorun, computed } from "mobx";
 import BigNumber from "bignumber.js";
-
-// TODO use AuctionBase instead of separate Auction contracts
+import styled from "react-emotion";
+import { Button, Spacer } from "../styles";
 
 @inject("store")
 @observer
@@ -22,8 +22,8 @@ export default class Auction extends Component {
         this.getAuction(auctionId);
         this.getCurrentAccountBid(auctionId);
       },
-      true
-    ); // invoke immediately
+      true // invoke immediately
+    );
   }
 
   @action
@@ -111,9 +111,10 @@ export default class Auction extends Component {
         <div>Highest bid: {highestBid.toString()}</div>
         <div>Highest bidder: {highestBidder ? highestBidder : "None"}</div>
         <div>Your bid: {this.currentAccountBid.toString()}</div>
-        <button onClick={() => this.placeBid(this.nextMinBid)}>
+        <Spacer />
+        <Button onClick={() => this.placeBid(this.nextMinBid)}>
           Place Bid!!
-        </button>
+        </Button>
       </div>
     );
   }

@@ -1,18 +1,4 @@
 {
-  "presets": ["es2015", "stage-0", "react"],
-  "plugins": ["transform-decorators-legacy"],
-  "env": {
-      "development": {
-          "plugins": [
-            "transform-runtime",
-            ["react-transform", {
-              "transforms": [{
-                "transform" : "react-transform-hmr",
-                "imports"   : ["react"],
-                "locals"    : ["module"]
-          }]
-        }]
-      ]
-    }
-  }
+  "presets": ["es2015", "stage-1", "react"],
+  "plugins": ["transform-decorators-legacy"]
 }
