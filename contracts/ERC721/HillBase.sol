@@ -75,7 +75,7 @@ contract HillBase is HillAccessControl {
     });
 
     uint256 newHillId = hills.push(_hill) - 1;
-    _transfer(0, _owner, newHillId)
+    _transfer(0, _owner, newHillId);
     return newHillId;
   }
 }

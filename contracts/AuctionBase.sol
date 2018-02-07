@@ -213,7 +213,7 @@ contract AuctionBase is Pausable {
     return (_auction.cancelled || _isEnded(_auction));
   }
 
-  function _getAuctionEndAt(Auction storage auction) internal view returns (bool) {
+  function _getAuctionEndAt(Auction storage _auction) internal view returns (uint64) {
     return (_auction.startedAt + _auction.duration);
   }
 
