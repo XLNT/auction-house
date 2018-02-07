@@ -7,14 +7,20 @@ import "./utils/Pausable.sol";
 /// @dev Contains models, variables, and internal methods for the auction.
 contract AuctionBase is Pausable {
 
+  // Active: Auction is accepting bids and is not cancelled.
+  // Cancelled: The seller cancelled the auction.
+  // Completed: Winning bid decided, but NFT and balance transfers are yet to happen.
+  enum AuctionStatus { Active, Cancelled, Completed }
+
   struct Auction {
     // static
     address nftAddress; // NFT address
     uint256 tokenId; // ID of the nft
     address seller; // Current owner of NFT
     uint128 bidIncrement; // Minimum bid increment (in Wei)
-    uint64 duration; // Duration (in seconds) of auction
-    uint64 startedAt; // Time when auction started (0 if auction is concluded)
+    uint256 duration; // Block count for when the auction ends
+    uint256 startBlock; // Block number when auction started (0 if auction is completed)
+    uint256 startedAt; // Approximate time for when the auction was started
 
     // state
     mapping (address => uint256) allowed; // Mapping of addresses to balance to withdraw
@@ -49,24 +55,27 @@ contract AuctionBase is Pausable {
     uint256 tokenId,
     address seller,
     uint256 bidIncrement,
-    uint64 duration,
-    uint64 startedAt,
-    bool isActive,
+    uint256 duration,
+    uint256 startedAt,
+    uint256 startBlock,
+    AuctionStatus status,
     uint256 highestBid,
     address highestBidder
   ) {
-    Auction storage auction = auctions[_id];
+    Auction memory _auction = auctions[_id];
+    AuctionStatus _status = _getAuctionStatus(_id);
     return (
       _id,
-      auction.nftAddress,
-      auction.tokenId,
-      auction.seller,
-      auction.bidIncrement,
-      auction.duration,
-      auction.startedAt,
-      _isActive(auction),
-      auction.highestBid,
-      auction.highestBidder
+      _auction.nftAddress,
+      _auction.tokenId,
+      _auction.seller,
+      _auction.bidIncrement,
+      _auction.duration,
+      _auction.startedAt,
+      _auction.startBlock,
+      _status,
+      _auction.highestBid,
+      _auction.highestBidder
     );
   }
 
@@ -82,7 +91,8 @@ contract AuctionBase is Pausable {
   // function withdrawBalance(uint256 _id) external {
   // }
 
-  /// @dev Creates and begins a new auction.
+  // @dev Creates and begins a new auction.
+  // @_duration is in seconds and is converted to block count.
   function createAuction(
     address _nftAddress,
     uint256 _tokenId,
@@ -101,6 +111,8 @@ contract AuctionBase is Pausable {
     // Require duration to be at least a minute
     require(_duration >= 60);
 
+    uint256 durationBlockCount = _duration / 14;
+
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
 
@@ -110,10 +122,11 @@ contract AuctionBase is Pausable {
       tokenId: _tokenId,
       seller: msg.sender,
       bidIncrement: uint128(_bidIncrement),
-      duration: uint64(_duration),
-      startedAt: uint64(now),
+      duration: durationBlockCount,
+      startedAt: now,
+      startBlock: block.number,
       highestBid: 0,
-      highestBidder: 0,
+      highestBidder: address(0),
       cancelled: false
     });
 
@@ -126,13 +139,16 @@ contract AuctionBase is Pausable {
     AuctionCreated(newAuctionId, _nftAddress, _tokenId);
   }
 
-  function bid(uint256 _id) external payable whenNotPaused {
+  function bid(uint256 _auctionId)
+    external
+    payable
+    whenNotPaused
+    statusIs(AuctionStatus.Active, _auctionId)
+  {
     require(msg.value > 0);
 
     // Get auction from _id
-    Auction storage auction = auctions[_id];
-
-    require(_isActive(auction));
+    Auction storage auction = auctions[_auctionId];
 
     // Set newBid
     uint256 newBid;
@@ -154,7 +170,7 @@ contract AuctionBase is Pausable {
     auction.highestBid = newBid;
 
     // Emit BidCreated event
-    BidCreated(_id, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+    BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
   }
 
   function cancelAuction(address _nftAddress, uint256 _tokenId) external {
@@ -179,14 +195,18 @@ contract AuctionBase is Pausable {
   }
 
   /// @dev Cancels an auction unconditionally.
-  function _cancelAuction(uint256 _id) internal {
-    Auction storage auction = auctions[_id];
-    require(_isActive(auction));
-    require(msg.sender == auction.seller);
+  function _cancelAuction(uint256 _auctionId)
+    internal
+    statusIs(AuctionStatus.Active, _auctionId)
+    onlySeller(_auctionId)
+  {
+    Auction storage auction = auctions[_auctionId];
     auction.cancelled = true;
+
     _removeAuction(auction.nftAddress, auction.tokenId);
     _transfer(auction.nftAddress, auction.seller, auction.tokenId);
-    AuctionCancelled(_id, auction.nftAddress, auction.tokenId);
+
+    AuctionCancelled(_auctionId, auction.nftAddress, auction.tokenId);
   }
 
   /// @dev Removes an auction from mapping
@@ -194,22 +214,27 @@ contract AuctionBase is Pausable {
     delete nftToTokenIdToAuctionId[_nft][_tokenId];
   }
 
-  /// @dev Returns true if the NFT is on auction.
-  /// @param _auction - Auction to check.
-  function _isActive(Auction storage _auction) internal view returns (bool) {
-    return (_auction.startedAt > 0 && !_auction.cancelled && _getAuctionEndAt(_auction) <= now);
+  modifier onlySeller(uint256 _auctionId) {
+    Auction memory auction = auctions[_auctionId];
+    require(msg.sender == auction.seller);
+    _;
   }
 
-  function _isEnded(Auction storage _auction) internal view returns (bool) {
-    return (_getAuctionEndAt(_auction) > now);
+  modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
+    require(expectedStatus == _getAuctionStatus(_auctionId));
+    _;
   }
 
-  function _isWithdrawable(Auction storage _auction) internal view returns (bool) {
-    return (_auction.cancelled || _isEnded(_auction));
-  }
+  function _getAuctionStatus(uint256 _auctionId) internal view returns (AuctionStatus) {
+    Auction storage auction = auctions[_auctionId];
 
-  function _getAuctionEndAt(Auction storage _auction) internal view returns (uint64) {
-    return (_auction.startedAt + _auction.duration);
+    if (auction.cancelled) {
+      return AuctionStatus.Cancelled;
+    } else if (auction.startBlock + auction.duration < block.number) {
+      return AuctionStatus.Completed;
+    } else {
+      return AuctionStatus.Active;
+    }
   }
 
   /// @dev Reject all Ether from being sent here

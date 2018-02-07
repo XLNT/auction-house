@@ -63,9 +63,10 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
-      isActive,
+      startBlock,
+      status,
       highestBid,
-      highestBidder
+      highestBidder,
     ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
     this.auction = {
       id,
@@ -75,9 +76,10 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
-      isActive,
+      startBlock,
+      status,
       highestBid,
-      highestBidder
+      highestBidder,
     };
     this.loadingAuction = false;
   }
@@ -122,10 +124,13 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
-      isActive,
+      startBlock,
+      status,
       highestBid,
-      highestBidder
+      highestBidder,
     } = this.auction;
+
+    const isActive = status.equals(0);
 
     return (
       <Wrapper>
