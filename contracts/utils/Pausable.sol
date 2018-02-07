@@ -2,9 +2,7 @@
 // https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/lifecycle/Pausable.sol
 pragma solidity ^0.4.18;
 
-
 import "./Ownable.sol";
-
 
 /**
  * @title Pausable
@@ -15,7 +13,6 @@ contract Pausable is Ownable {
   event Unpause();
 
   bool public paused = false;
-
 
   /**
    * @dev Modifier to make a function callable only when the contract is not paused.
