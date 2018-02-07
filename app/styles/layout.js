@@ -1,5 +1,5 @@
 import styled, { css } from "react-emotion";
-import { basePadding } from "../styles";
+import { basePadding, screenWidth } from "../styles";
 
 const spacerSize = (pads, props) => {
   return css`
@@ -19,4 +19,10 @@ export const Spacer = styled("div")`
     `
     display: inline-block;
   `};
+`;
+
+export const Wrapper = styled("div")`
+  width: 95%;
+  max-width: ${screenWidth}px;
+  margin: auto;
 `;

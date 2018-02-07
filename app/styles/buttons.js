@@ -1,5 +1,5 @@
 import styled from "react-emotion";
-import { colors, basePadding, darken } from "../styles";
+import { colors, basePadding, lighten, darken } from "../styles";
 
 export const Button = styled("button")`
   display: inline-block;
@@ -12,7 +12,7 @@ export const Button = styled("button")`
   border-radius: 3px;
 
   &:hover {
-    background-color: ${darken(colors.white, 5)};
+    background-color: ${lighten(colors.yellow, 45)};
   }
 
   &:active {
