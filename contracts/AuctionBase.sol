@@ -7,10 +7,10 @@ import "./utils/Pausable.sol";
 /// @dev Contains models, variables, and internal methods for the auction.
 contract AuctionBase is Pausable {
 
-  // Ongoing: Auction is accepting bids and is not cancelled.
+  // Active: Auction is accepting bids and is not cancelled.
   // Cancelled: The seller cancelled the auction.
-  // Concluded: Winning bid decided, but NFT and balance transfers are yet to happen.
-  enum AuctionStatus { Ongoing, Cancelled, Concluded }
+  // Completed: Winning bid decided, but NFT and balance transfers are yet to happen.
+  enum AuctionStatus { Active, Cancelled, Completed }
 
   struct Auction {
     // static
@@ -19,7 +19,7 @@ contract AuctionBase is Pausable {
     address seller; // Current owner of NFT
     uint128 bidIncrement; // Minimum bid increment (in Wei)
     uint256 duration; // Block count for when the auction ends
-    uint256 startBlock; // Block number when auction started (0 if auction is concluded)
+    uint256 startBlock; // Block number when auction started (0 if auction is completed)
     uint256 startedAt; // Approximate time for when the auction was started
 
     // state
@@ -60,8 +60,7 @@ contract AuctionBase is Pausable {
     uint256 startBlock,
     AuctionStatus status,
     uint256 highestBid,
-    address highestBidder,
-    bool cancelled
+    address highestBidder
   ) {
     Auction memory _auction = auctions[_id];
     AuctionStatus _status = _getAuctionStatus(_id);
@@ -76,8 +75,7 @@ contract AuctionBase is Pausable {
       _auction.startBlock,
       _status,
       _auction.highestBid,
-      _auction.highestBidder,
-      _auction.cancelled
+      _auction.highestBidder
     );
   }
 
@@ -145,7 +143,7 @@ contract AuctionBase is Pausable {
     external
     payable
     whenNotPaused
-    isExpectedState(AuctionStatus.Ongoing, _auctionId)
+    statusIs(AuctionStatus.Active, _auctionId)
   {
     require(msg.value > 0);
 
@@ -199,7 +197,7 @@ contract AuctionBase is Pausable {
   /// @dev Cancels an auction unconditionally.
   function _cancelAuction(uint256 _auctionId)
     internal
-    isExpectedState(AuctionStatus.Ongoing, _auctionId)
+    statusIs(AuctionStatus.Active, _auctionId)
     onlySeller(_auctionId)
   {
     Auction storage auction = auctions[_auctionId];
@@ -222,8 +220,8 @@ contract AuctionBase is Pausable {
     _;
   }
 
-  modifier isExpectedState(AuctionStatus _expectedState, uint256 _auctionId) {
-    require(_expectedState == _getAuctionStatus(_auctionId));
+  modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
+    require(expectedStatus == _getAuctionStatus(_auctionId));
     _;
   }
 
@@ -233,9 +231,9 @@ contract AuctionBase is Pausable {
     if (auction.cancelled) {
       return AuctionStatus.Cancelled;
     } else if (auction.startBlock + auction.duration < block.number) {
-      return AuctionStatus.Concluded;
+      return AuctionStatus.Completed;
     } else {
-      return AuctionStatus.Ongoing;
+      return AuctionStatus.Active;
     }
   }
 
