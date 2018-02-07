@@ -79,14 +79,8 @@ contract AuctionBase is Pausable {
 
   // TODO
   // @dev Allow people to withdraw their balances
-  function withdrawBalance(uint256 _id) external {
-    require(msg.sender == owner);
-    msg.sender.transfer(this.balance);
-
-    // Get auction from _id
-    Auction storage auction = auctions[_id];
-    require(_isWithdrawable(auction));
-  }
+  // function withdrawBalance(uint256 _id) external {
+  // }
 
   /// @dev Creates and begins a new auction.
   function createAuction(
