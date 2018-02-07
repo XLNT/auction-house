@@ -20,6 +20,7 @@ contract AuctionBase is Pausable {
     mapping (address => uint256) allowed; // Mapping of addresses to balance to withdraw
     uint256 highestBid; // Current highest bid
     address highestBidder; // Address of current highest bidder
+    bool cancelled; // Flag for cancelled auctions
   }
 
   // Map from token ID to their corresponding auction ID.
@@ -75,11 +76,16 @@ contract AuctionBase is Pausable {
     return auction.allowed[bidder];
   }
 
-  /// TODO
-  // function withdrawBalance() external {
-  //   require(msg.sender == owner);
-  //   msg.sender.transfer(this.balance);
-  // }
+  // TODO
+  // @dev Allow people to withdraw their balances
+  function withdrawBalance(uint256 _id) external {
+    require(msg.sender == owner);
+    msg.sender.transfer(this.balance);
+
+    // Get auction from _id
+    Auction storage auction = auctions[_id];
+    require(_isWithdrawable(auction));
+  }
 
   /// @dev Creates and begins a new auction.
   function createAuction(
@@ -98,8 +104,7 @@ contract AuctionBase is Pausable {
     require(nftContract.ownerOf(_tokenId) == msg.sender);
 
     // Require duration to be at least a minute
-    // TODO
-    // require(_duration >= 1 minutes);
+    require(_duration >= 1 minutes);
 
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
@@ -113,7 +118,8 @@ contract AuctionBase is Pausable {
       duration: uint64(_duration),
       startedAt: uint64(now),
       highestBid: 0,
-      highestBidder: 0
+      highestBidder: 0,
+      cancelled: false
     });
 
     uint256 newAuctionId = auctions.push(_auction) - 1;
@@ -130,6 +136,8 @@ contract AuctionBase is Pausable {
 
     // Get auction from _id
     Auction storage auction = auctions[_id];
+
+    require(_isActive(auction));
 
     // Set newBid
     uint256 newBid;
@@ -180,6 +188,7 @@ contract AuctionBase is Pausable {
     Auction storage auction = auctions[_id];
     require(_isActive(auction));
     require(msg.sender == auction.seller);
+    auction.cancelled = true;
     _removeAuction(auction.nftAddress, auction.tokenId);
     _transfer(auction.nftAddress, auction.seller, auction.tokenId);
     AuctionCancelled(_id, auction.nftAddress, auction.tokenId);
@@ -193,7 +202,19 @@ contract AuctionBase is Pausable {
   /// @dev Returns true if the NFT is on auction.
   /// @param _auction - Auction to check.
   function _isActive(Auction storage _auction) internal view returns (bool) {
-    return (_auction.startedAt > 0);
+    return (_auction.startedAt > 0 && !_auction.cancelled && _getAuctionEndAt(_auction) <= now);
+  }
+
+  function _isEnded(Auction storage _auction) internal view returns (bool) {
+    return (_getAuctionEndAt(_auction) > now);
+  }
+
+  function _isWithdrawable(Auction storage _auction) internal view returns (bool) {
+    return (_auction.cancelled || _isEnded(_auction));
+  }
+
+  function _getAuctionEndAt(Auction storage auction) internal view returns (bool) {
+    return (_auction.startedAt + _auction.duration);
   }
 
   /// @dev Reject all Ether from being sent here
