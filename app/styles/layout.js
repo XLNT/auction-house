@@ -1,25 +1,22 @@
 import styled, { css } from "react-emotion";
+import { basePadding } from "../styles";
 
-// const spacerSize = (pads, props) => {
-//   if props.inline {
-//     return css`
-//       width: ${basePadding * pads}px
-//     `;
-//   } else {
-//     return css`
-//       height: ${basePadding * pads}px
-//     `;
-//   }
-// };
-
-// display: ${props => (props.inline ? "inline-block" : "block")};
-
-const spacerSize = css`
-  height: ${20}px;
-`;
+const spacerSize = (pads, props) => {
+  return css`
+    ${props.inline ? "width:" : "height:"} ${basePadding * pads}px;
+  `;
+};
 
 export const Spacer = styled("div")`
-  ${spacerSize};
-  display: block;
+  ${props => {
+    if (props.big) return spacerSize(2, props);
+    if (props.small) return spacerSize(0.5, props);
+    if (props.size) return spacerSize(props.size, props);
+    return spacerSize(1, props);
+  }};
+  ${props =>
+    props.inline &&
+    `
+    display: inline-block;
+  `};
 `;
-
