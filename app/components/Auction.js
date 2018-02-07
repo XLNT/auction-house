@@ -2,8 +2,33 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { observable, observe, action, autorun, computed } from "mobx";
 import BigNumber from "bignumber.js";
+import styled from "react-emotion";
+import {
+  Wrapper,
+  Button,
+  Badge,
+  Spacer,
+  colors,
+  basePadding,
+  fontSizes,
+  darken
+} from "../styles";
 
-// TODO use AuctionBase instead of separate Auction contracts
+const AuctionHeader = styled("div")`
+  border-bottom: 1px solid ${colors.black};
+`;
+
+const AuctionGallery = styled("div")`
+  width: 100%;
+  height: 400px;
+  background-color: ${colors.yellow};
+`;
+
+const AuctionHeading = styled("span")`
+  font-size: ${fontSizes.huge};
+  font-weight: 600;
+  display: inline-block;
+`;
 
 @inject("store")
 @observer
@@ -22,8 +47,8 @@ export default class Auction extends Component {
         this.getAuction(auctionId);
         this.getCurrentAccountBid(auctionId);
       },
-      true
-    ); // invoke immediately
+      true // invoke immediately
+    );
   }
 
   @action
@@ -38,6 +63,7 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
+      isActive,
       highestBid,
       highestBidder
     ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
@@ -49,6 +75,7 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
+      isActive,
       highestBid,
       highestBidder
     };
@@ -95,26 +122,38 @@ export default class Auction extends Component {
       bidIncrement,
       duration,
       startedAt,
+      isActive,
       highestBid,
       highestBidder
     } = this.auction;
 
     return (
-      <div>
-        <h1>Auction {id.toString()}</h1>
-        <div>NFT address: {nftAddress}</div>
-        <div>Token ID: {tokenId.toString()}</div>
-        <div>Seller: {seller}</div>
-        <div>Bid increment (in Wei): {bidIncrement.toString()}</div>
-        <div>Duration: {duration.toString()}</div>
-        <div>Started at: {startedAt.toString()}</div>
-        <div>Highest bid: {highestBid.toString()}</div>
-        <div>Highest bidder: {highestBidder ? highestBidder : "None"}</div>
-        <div>Your bid: {this.currentAccountBid.toString()}</div>
-        <button onClick={() => this.placeBid(this.nextMinBid)}>
-          Place Bid!!
-        </button>
-      </div>
+      <Wrapper>
+        <AuctionHeader>
+          <AuctionHeading>Auction {id.toString()}</AuctionHeading>{" "}
+          {isActive && <Badge>LIVE</Badge>}
+        </AuctionHeader>
+        <Spacer />
+        <AuctionGallery />
+        <Spacer />
+        <div>
+          <div>NFT address: {nftAddress}</div>
+          <div>Token ID: {tokenId.toString()}</div>
+          <div>Seller: {seller}</div>
+          <div>Bid increment (in Wei): {bidIncrement.toString()}</div>
+          <div>Duration: {duration.toString()}</div>
+          <div>Started at: {startedAt.toString()}</div>
+          <div>Highest bid: {highestBid.toString()}</div>
+          <div>Highest bidder: {highestBidder ? highestBidder : "None"}</div>
+        </div>
+        <div>
+          <div>Your bid: {this.currentAccountBid.toString()}</div>
+          <Spacer />
+          <Button onClick={() => this.placeBid(this.nextMinBid)}>
+            Place Bid!!
+          </Button>
+        </div>
+      </Wrapper>
     );
   }
 }
