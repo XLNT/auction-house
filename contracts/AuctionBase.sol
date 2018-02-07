@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
+import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "./erc721/ERC721.sol";
-import "./utils/Pausable.sol";
 
 /// @title AuctionBase
 /// @dev Contains models, variables, and internal methods for the auction.
