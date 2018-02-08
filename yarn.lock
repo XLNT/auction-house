@@ -942,6 +942,12 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
+bidi-mobx@^0.20.0:
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/bidi-mobx/-/bidi-mobx-0.20.0.tgz#fb9db572fb1fe533629f59b9187100e18bbf6f32"
+  dependencies:
+    boxm "^0.4.1"
+
 big.js@^3.1.3:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-3.2.0.tgz#a5fc298b81b9e0dca2e458824784b65c52ba588e"
@@ -996,6 +1002,10 @@ boom@2.x.x:
   resolved "https://registry.yarnpkg.com/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
   dependencies:
     hoek "2.x.x"
+
+boxm@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/boxm/-/boxm-0.4.1.tgz#79d40e33439af7922429a9c44ab2e752271c339c"
 
 brace-expansion@^1.1.7:
   version "1.1.8"
@@ -3671,7 +3681,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.10, prop-types@^15.5.4:
+prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.6.0:
   version "15.6.0"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
   dependencies:
