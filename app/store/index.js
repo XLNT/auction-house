@@ -1,8 +1,7 @@
 import { action, observable } from "mobx";
 import contract from "truffle-contract";
 import AuctionBaseContract from "../../build/contracts/AuctionBase.json";
-import HillCoreContract from "../../build/contracts/HillCore.json";
-import { HILL_CORE_ABI, HILL_CORE_ADDRESS } from "../ERC821Contracts";
+import { HILL_CORE_ABI, HILL_CORE_ADDRESS } from "../contracts";
 
 export default class Store {
   @observable currentAccount = null;
