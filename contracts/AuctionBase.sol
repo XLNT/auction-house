@@ -1,11 +1,13 @@
 pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./erc721/ERC721.sol";
 
 /// @title AuctionBase
 /// @dev Contains models, variables, and internal methods for the auction.
 contract AuctionBase is Pausable {
+  using SafeMath for uint256;
 
   // Active: Auction is accepting bids and is not cancelled.
   // Cancelled: The seller cancelled the auction.
@@ -37,7 +39,8 @@ contract AuctionBase is Pausable {
   event AuctionSuccessful(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionCancelled(uint256 id, address nftAddress, uint256 tokenId);
   event BidCreated(uint256 id, address nftAddress, uint256 tokenId, address bidder, uint256 bid);
-  event AuctionWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer, uint256 amount);
+  event AuctionNFTWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer);
+  event AuctionFundWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer, uint256 amount);
 
   // External functions
 
@@ -111,7 +114,7 @@ contract AuctionBase is Pausable {
 
     // Require duration to be at least a minute and calculate block count
     require(_duration >= 60);
-    uint256 durationBlockCount = _duration / 14;
+    uint256 durationBlockCount = _duration.div(uint256(14));
 
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
@@ -151,7 +154,7 @@ contract AuctionBase is Pausable {
     Auction storage auction = auctions[_auctionId];
 
     // Require newBid be greater than or equal to highestBid + bidIncrement
-    uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
+    uint256 newBid = auction.fundsByBidder[msg.sender].add(msg.value);
     require(newBid >= auction.highestBid + auction.bidIncrement);
 
     // Update fundsByBidder mapping
@@ -172,38 +175,47 @@ contract AuctionBase is Pausable {
     require(_status == AuctionStatus.Cancelled || _status == AuctionStatus.Completed);
 
     Auction storage auction = auctions[_auctionId];
-    address withdrawalAccount;
+    address fundsFrom;
     uint withdrawalAmount;
 
     // Auction is cancelled
     if (_status == AuctionStatus.Cancelled) {
-      withdrawalAccount = msg.sender;
-      withdrawalAmount = auction.fundsByBidder[withdrawalAccount];
+      fundsFrom = msg.sender;
+      withdrawalAmount = auction.fundsByBidder[fundsFrom];
     }
     // Auction is completed
     else {
       // The seller gets the highest bid
       if (msg.sender == auction.seller) {
-        withdrawalAccount = auction.highestBidder;
+        require(_status == AuctionStatus.Completed);
+        fundsFrom = auction.highestBidder;
         withdrawalAmount = auction.highestBid;
       }
       // Highest bidder can only withdraw the NFT
       else if (msg.sender == auction.highestBidder) {
+        require(_status == AuctionStatus.Completed);
         _transfer(auction.nftAddress, auction.highestBidder, auction.tokenId);
+        AuctionNFTWithdrawal(_auctionId, auction.nftAddress, auction.tokenId, msg.sender);
+        return true;
       }
       // Anyone else gets what they bid
       else {
-        withdrawalAccount = msg.sender;
-        withdrawalAmount = auction.fundsByBidder[withdrawalAccount];
+        fundsFrom = msg.sender;
+        withdrawalAmount = auction.fundsByBidder[fundsFrom];
       }
     }
 
     require(withdrawalAmount > 0);
-    auction.fundsByBidder[withdrawalAccount] -= withdrawalAmount;
+    auction.fundsByBidder[fundsFrom].sub(withdrawalAmount);
     msg.sender.transfer(withdrawalAmount);
 
-    AuctionWithdrawal(_auctionId, auction.nftAddress, auction.tokenId,
-      withdrawalAccount, withdrawalAmount);
+    AuctionFundWithdrawal(
+      _auctionId,
+      auction.nftAddress,
+      auction.tokenId,
+      msg.sender,
+      withdrawalAmount
+    );
     return true;
   }
 
