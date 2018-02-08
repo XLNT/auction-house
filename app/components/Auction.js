@@ -68,7 +68,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
     this.auction = {
       id,
@@ -81,7 +81,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     };
     this.loadingAuction = false;
   }
@@ -149,7 +149,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     } = this.auction;
 
     const isActive = status.equals(0);
@@ -173,10 +173,17 @@ export default class Auction extends Component {
         </div>
         <Spacer />
         <div>
-          <b>Current highest bid:</b> {this.highestEthBid.toString()} ETH from{" "}
-          {highestBidder == this.props.store.currentAccount
-            ? "you"
-            : highestBidder}
+          <b>Current highest bid:</b>{" "}
+          {highestBid > 0 ? (
+            <span>
+              {this.highestEthBid.toString()} ETH from{" "}
+              {highestBidder == this.props.store.currentAccount
+                ? "you"
+                : highestBidder}
+            </span>
+          ) : (
+            <span>No bids yet</span>
+          )}
         </div>
         <Spacer />
         {this.showBidBox ? (

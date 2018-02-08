@@ -50,7 +50,7 @@ export default class AuctionBidBox extends Component {
   render() {
     return (
       <div>
-        <span>{this.newEthBid.toNumber()} ETH</span>
+        <span>{this.newEthBid.toNumber()} ETH</span>{" "}
         <Button
           disabled={!this.bidIsValid(this.downBid)}
           onClick={() => this.updateBid(this.downBid)}
