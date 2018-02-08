@@ -3,6 +3,7 @@ import { inject, observer } from "mobx-react";
 import { observable, observe, action, autorun, computed } from "mobx";
 import BigNumber from "bignumber.js";
 import styled from "react-emotion";
+import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
   Button,
@@ -36,6 +37,7 @@ export default class Auction extends Component {
   @observable auction;
   @observable loadingAuction = true;
   @observable currentAccountBid = new BigNumber(0);
+  @observable hideOwnBidWarning = false;
 
   async componentDidMount() {
     this.auctionBase = await this.props.store.AuctionBase.deployed();
@@ -66,7 +68,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
     this.auction = {
       id,
@@ -79,7 +81,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     };
     this.loadingAuction = false;
   }
@@ -99,12 +101,20 @@ export default class Auction extends Component {
     );
   }
 
+  @action
   async placeBid(bigNumber) {
+    const adjustedBid = bigNumber.minus(this.currentAccountBid);
     const params = {
       from: this.props.store.currentAccount,
-      value: bigNumber
+      value: adjustedBid
     };
     const receipt = await this.auctionBase.bid(this.auction.id, params);
+    this.hideOwnBidWarning = false;
+  }
+
+  @action
+  hideBidWarning() {
+    this.hideOwnBidWarning = true;
   }
 
   @computed
@@ -112,6 +122,18 @@ export default class Auction extends Component {
     if (!this.auction) return false;
     const { highestBid, bidIncrement } = this.auction;
     return highestBid.plus(bidIncrement).minus(this.currentAccountBid);
+  }
+
+  @computed
+  get highestEthBid() {
+    return this.props.store.web3.fromWei(this.auction.highestBid, "ether");
+  }
+
+  @computed
+  get showBidBox() {
+    const ownHighestBid =
+      this.auction.highestBidder == this.props.store.currentAccount;
+    return !ownHighestBid || this.hideOwnBidWarning;
   }
 
   render() {
@@ -127,7 +149,7 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder,
+      highestBidder
     } = this.auction;
 
     const isActive = status.equals(0);
@@ -136,28 +158,47 @@ export default class Auction extends Component {
       <Wrapper>
         <AuctionHeader>
           <AuctionHeading>Auction {id.toString()}</AuctionHeading>{" "}
-          {isActive && <Badge>LIVE</Badge>}
+          {isActive && <Badge color={colors.green}>LIVE</Badge>}
         </AuctionHeader>
         <Spacer />
         <AuctionGallery />
         <Spacer />
         <div>
-          <div>NFT address: {nftAddress}</div>
-          <div>Token ID: {tokenId.toString()}</div>
+          <b>Metadata</b>
+          <Spacer size={0.5} />
+          <div>
+            NFT: {tokenId.toString()}@{nftAddress}
+          </div>
           <div>Seller: {seller}</div>
-          <div>Bid increment (in Wei): {bidIncrement.toString()}</div>
-          <div>Duration: {duration.toString()}</div>
-          <div>Started at: {startedAt.toString()}</div>
-          <div>Highest bid: {highestBid.toString()}</div>
-          <div>Highest bidder: {highestBidder ? highestBidder : "None"}</div>
         </div>
+        <Spacer />
         <div>
-          <div>Your bid: {this.currentAccountBid.toString()}</div>
-          <Spacer />
-          <Button onClick={() => this.placeBid(this.nextMinBid)}>
-            Place Bid!!
-          </Button>
+          <b>Current highest bid:</b>{" "}
+          {highestBid > 0 ? (
+            <span>
+              {this.highestEthBid.toString()} ETH from{" "}
+              {highestBidder == this.props.store.currentAccount
+                ? "you"
+                : highestBidder}
+            </span>
+          ) : (
+            <span>No bids yet</span>
+          )}
         </div>
+        <Spacer />
+        {this.showBidBox ? (
+          <AuctionBidBox
+            highestBid={highestBid}
+            bidIncrement={bidIncrement}
+            callback={bid => this.placeBid(bid)}
+          />
+        ) : (
+          <span>
+            <b>🎉 You're the highest bidder!</b>{" "}
+            <a onClick={() => this.hideBidWarning()}>Bid higher?</a>
+          </span>
+        )}
+        <Spacer size={2} />
       </Wrapper>
     );
   }

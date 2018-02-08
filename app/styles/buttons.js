@@ -19,4 +19,9 @@ export const Button = styled("button")`
     margin-top: 1px;
     box-shadow: 1px 1px ${colors.black};
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
