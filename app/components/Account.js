@@ -16,7 +16,6 @@ export default class Account extends Component {
     this.hillCoreWatcher = when(
       () => this.props.store.hillCoreInstance,
       () => {
-        this.hillCoreWatcher = null;
         this.blockWatcher = observe(
           this.props.store,
           "currentBlock",
