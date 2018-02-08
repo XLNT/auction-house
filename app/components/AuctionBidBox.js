@@ -56,13 +56,13 @@ export default class AuctionBidBox extends Component {
           onClick={() => this.updateBid(this.downBid)}
         >
           -
-        </Button>
+        </Button>{" "}
         <Button
           disabled={!this.bidIsValid(this.upBid)}
           onClick={() => this.updateBid(this.upBid)}
         >
           +
-        </Button>
+        </Button>{" "}
         <Button onClick={() => this.submitBid()}>Place Bid!!</Button>
         {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
       </div>
