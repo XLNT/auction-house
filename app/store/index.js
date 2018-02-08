@@ -2,10 +2,12 @@ import { action, observable } from "mobx";
 import contract from "truffle-contract";
 import AuctionBaseContract from "../../build/contracts/AuctionBase.json";
 import HillCoreContract from "../../build/contracts/HillCore.json";
+import { HILL_CORE_ABI, HILL_CORE_ADDRESS } from "../ERC821Contracts";
 
 export default class Store {
   @observable currentAccount = null;
   @observable currentBlock = "latest";
+  @observable hillCoreInstance = null;
 
   constructor(web3) {
     this.web3 = web3;
@@ -16,8 +18,13 @@ export default class Store {
     this.AuctionBase.setProvider(this.web3.currentProvider);
 
     // Setup CryptoHills contract
-    this.HillCore = contract(HillCoreContract);
-    this.HillCore.setProvider(this.web3.currentProvider);
+    const HillCore = contract({
+      abi: HILL_CORE_ABI
+    });
+    HillCore.setProvider(this.web3.currentProvider);
+    HillCore.at(HILL_CORE_ADDRESS).then(instance => {
+      this.hillCoreInstance = instance;
+    });
     window.s = this;
   }
 

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { observable, observe, action, autorun, computed } from "mobx";
+import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
 
 @inject("store")
@@ -11,53 +11,81 @@ export default class Account extends Component {
   @observable cryptoHillsBalance = new BigNumber(0);
 
   async componentDidMount() {
-    this.hillCoreInstance = await this.props.store.HillCore.deployed();
     this.auction = await this.props.store.AuctionBase.deployed();
     window.s = this;
-    this.getCryptoHillsBalance();
-    const blockWatcher = observe(this.props.store, "currentBlock", change => {
-      this.getCryptoHillsBalance();
-    });
-    const balanceWatcher = observe(this, "cryptoHillsBalance", change => {
+    this.hillCoreWatcher = when(
+      () => this.props.store.hillCoreInstance,
+      () => {
+        this.hillCoreWatcher = null;
+        this.blockWatcher = observe(
+          this.props.store,
+          "currentBlock",
+          change => {
+            this.getCryptoHillsBalance();
+          }
+        );
+      }
+    );
+
+    this.balanceWatcher = observe(this, "cryptoHillsBalance", change => {
       this.getCryptoHills();
     });
   }
 
+  componentWillUnmount() {
+    if (this.hillCoreWatcher) {
+      this.hillCoreWatcher();
+    }
+
+    if (this.blockWatcher) {
+      this.blockWatcher();
+    }
+
+    if (this.balanceWatcher) {
+      this.balanceWatcher();
+    }
+  }
+
   @action
   async getCryptoHills() {
-    const { currentAccount, currentBlock } = this.props.store;
+    const { currentAccount, currentBlock, hillCoreInstance } = this.props.store;
     this.loadingHills = true;
     this.cryptoHills = [];
     if (!currentAccount || this.cryptoHillsBalance == 0) return false;
-    const promises = [];
-    for (let i = 0; i < this.cryptoHillsBalance; i++) {
-      promises.push(
-        this.hillCoreInstance
-          .tokensOfOwnerByIndex(currentAccount, i)
-          .then(res => {
-            return this.importCryptoHill(res, currentBlock);
-          })
-      );
-    }
+    // const promises = [];
+    // for (let i = 0; i < this.cryptoHillsBalance; i++) {
+    //   promises.push(
+    //     this.hillCoreInstance
+    //       .tokensOfOwnerByIndex(currentAccount, i)
+    //       .then(res => {
+    //         return this.importCryptoHill(res, currentBlock);
+    //       })
+    //   );
+    // }
+    // this.cryptoHills = await Promise.all(promises);
+    const assets = await hillCoreInstance.assetsOf(
+      currentAccount,
+      currentBlock
+    );
+
+    const promises = assets.map(this.importCryptoHill.bind(this));
+
     this.cryptoHills = await Promise.all(promises);
   }
 
   async getCryptoHillsBalance() {
-    const { currentAccount, currentBlock } = this.props.store;
+    const { currentAccount, currentBlock, hillCoreInstance } = this.props.store;
     if (!currentAccount) return false;
-    this.cryptoHillsBalance = await this.hillCoreInstance.balanceOf(
+    this.cryptoHillsBalance = await hillCoreInstance.assetCount(
       currentAccount,
       currentBlock
     );
   }
 
-  async importCryptoHill(id, currentBlock) {
-    const [
-      elevation,
-      latitude,
-      longitude
-    ] = await this.hillCoreInstance.getHill(id, currentBlock);
-    return { elevation, latitude, longitude, id };
+  async importCryptoHill(id) {
+    const { hillCoreInstance, currentBlock } = this.props.store;
+    const hillData = await hillCoreInstance.assetData(id, currentBlock);
+    return { id, data: hillData };
   }
 
   approveTransfer(id, currentAccount) {
@@ -73,9 +101,15 @@ export default class Account extends Component {
   createAuction(id, currentAccount) {
     const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
     this.auction
-      .createAuction(this.hillCoreInstance.address, id, bidIncrement, 100000000000, {
-        from: currentAccount
-      })
+      .createAuction(
+        this.hillCoreInstance.address,
+        id,
+        bidIncrement,
+        100000000000,
+        {
+          from: currentAccount
+        }
+      )
       .then(res => {
         console.log(res);
       });
@@ -90,17 +124,13 @@ export default class Account extends Component {
           Crypto Hills Balance: {this.cryptoHillsBalance.toString()} Hills
         </div>
         <ul>
-          {this.cryptoHills.map(hill => (
-            <li key={hill.id.toString()}>
-              {JSON.stringify(hill)}{" "}
-              <button
-                onClick={() => this.approveTransfer(hill.id, currentAccount)}
-              >
+          {this.cryptoHills.map(({ id, data }) => (
+            <li key={id.toString()}>
+              ID: {id.toString()} data: {data}
+              <button onClick={() => this.approveTransfer(id, currentAccount)}>
                 Approve Transfer
               </button>
-              <button
-                onClick={() => this.createAuction(hill.id, currentAccount)}
-              >
+              <button onClick={() => this.createAuction(id, currentAccount)}>
                 Create Auction
               </button>
             </li>
