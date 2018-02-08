@@ -16,6 +16,7 @@ injectGlobal`
   a {
     color: ${colors.blue};
     text-decoration: none;
+    cursor: pointer;
     &:hover {
       text-decoration: underline;
     }

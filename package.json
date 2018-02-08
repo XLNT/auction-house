@@ -9,6 +9,7 @@
   "author": "Paul Fletcher-Hill <pfletcherhill@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bidi-mobx": "^0.20.0",
     "dotenv": "^4.0.0",
     "emotion": "^9.0.0",
     "express": "^4.16.2",
@@ -16,6 +17,7 @@
     "json-loader": "^0.5.7",
     "mobx": "^3.4.1",
     "mobx-react": "^4.3.5",
+    "prop-types": "^15.6.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-emotion": "^9.0.0",

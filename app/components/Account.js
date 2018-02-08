@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
+import { Wrapper } from "../styles";
 
 @inject("store")
 @observer
@@ -103,7 +104,7 @@ export default class Account extends Component {
   render() {
     const { currentAccount } = this.props.store;
     return (
-      <div>
+      <Wrapper>
         <h1>Account {currentAccount}</h1>
         <div>
           Crypto Hills Balance: {this.cryptoHillsBalance.toString()} Hills
@@ -121,7 +122,7 @@ export default class Account extends Component {
             </li>
           ))}
         </ul>
-      </div>
+      </Wrapper>
     );
   }
 }
