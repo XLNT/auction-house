@@ -1,15 +1,17 @@
 pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./erc721/ERC721.sol";
 
 /// @title AuctionBase
 /// @dev Contains models, variables, and internal methods for the auction.
 contract AuctionBase is Pausable {
+  using SafeMath for uint256;
 
   // Active: Auction is accepting bids and is not cancelled.
   // Cancelled: The seller cancelled the auction.
-  // Completed: Winning bid decided, but NFT and balance transfers are yet to happen.
+  // Completed: Winning bid decided, but NFT and bid transfers are yet to happen.
   enum AuctionStatus { Active, Cancelled, Completed }
 
   struct Auction {
@@ -19,11 +21,11 @@ contract AuctionBase is Pausable {
     address seller; // Current owner of NFT
     uint128 bidIncrement; // Minimum bid increment (in Wei)
     uint256 duration; // Block count for when the auction ends
-    uint256 startBlock; // Block number when auction started (0 if auction is completed)
+    uint256 startBlock; // Block number when auction started
     uint256 startedAt; // Approximate time for when the auction was started
 
     // state
-    mapping (address => uint256) allowed; // Mapping of addresses to balance to withdraw
+    mapping (address => uint256) fundsByBidder; // Mapping of addresses to funds
     uint256 highestBid; // Current highest bid
     address highestBidder; // Address of current highest bidder
     bool cancelled; // Flag for cancelled auctions
@@ -37,6 +39,10 @@ contract AuctionBase is Pausable {
   event AuctionSuccessful(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionCancelled(uint256 id, address nftAddress, uint256 tokenId);
   event BidCreated(uint256 id, address nftAddress, uint256 tokenId, address bidder, uint256 bid);
+  event AuctionNFTWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer);
+  event AuctionFundWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer, uint256 amount);
+
+  // External functions
 
   // @dev Retrieve auctions count
   function getAuctionsCount() public view returns (uint256) {
@@ -44,8 +50,8 @@ contract AuctionBase is Pausable {
   }
 
   // @dev Returns auction info for an NFT on auction.
-  // @param _id - auction index
-  function getAuction(uint256 _id)
+  // @param _auctionId - auction index/ID
+  function getAuction(uint256 _auctionId)
     external
     view
     returns
@@ -62,10 +68,10 @@ contract AuctionBase is Pausable {
     uint256 highestBid,
     address highestBidder
   ) {
-    Auction memory _auction = auctions[_id];
-    AuctionStatus _status = _getAuctionStatus(_id);
+    Auction memory _auction = auctions[_auctionId];
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
     return (
-      _id,
+      _auctionId,
       _auction.nftAddress,
       _auction.tokenId,
       _auction.seller,
@@ -80,16 +86,14 @@ contract AuctionBase is Pausable {
   }
 
   // @dev Return bid for given auction ID and bidder
-  function getBid(uint256 _id, address bidder) external view returns (uint256 bid) {
-    Auction storage auction = auctions[_id];
-    if (auction.highestBidder == bidder) return auction.highestBid;
-    return auction.allowed[bidder];
+  function getBid(uint256 _auctionId, address bidder)
+    external
+    view
+    returns (uint256 bid)
+  {
+    Auction storage auction = auctions[_auctionId];
+    return auction.fundsByBidder[bidder];
   }
-
-  // TODO
-  // @dev Allow people to withdraw their balances
-  // function withdrawBalance(uint256 _id) external {
-  // }
 
   // @dev Creates and begins a new auction.
   // @_duration is in seconds and is converted to block count.
@@ -108,15 +112,13 @@ contract AuctionBase is Pausable {
     // Require msg.sender to own nft
     require(nftContract.ownerOf(_tokenId) == msg.sender);
 
-    // Require duration to be at least a minute
+    // Require duration to be at least a minute and calculate block count
     require(_duration >= 60);
-
-    uint256 durationBlockCount = _duration / 14;
+    uint256 durationBlockCount = _duration.div(uint256(14));
 
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
 
-    // Init auction
     Auction memory _auction = Auction({
       nftAddress: _nftAddress,
       tokenId: _tokenId,
@@ -129,48 +131,84 @@ contract AuctionBase is Pausable {
       highestBidder: address(0),
       cancelled: false
     });
-
     uint256 newAuctionId = auctions.push(_auction) - 1;
 
     // Add auction index to nftToTokenIdToAuctionId mapping
     nftToTokenIdToAuctionId[_nftAddress][_tokenId] = newAuctionId;
 
-    // Emit AuctionCreated event
     AuctionCreated(newAuctionId, _nftAddress, _tokenId);
   }
 
+  // @dev Implements a simplified English auction
+  // Lets msg.sender bid highestBid + bidIncrement and stores bids in fundsByBidder
+  // TODO: Look into the experience of bidding in an English Auction asyncronously
   function bid(uint256 _auctionId)
     external
     payable
     whenNotPaused
     statusIs(AuctionStatus.Active, _auctionId)
+    returns (bool success)
   {
     require(msg.value > 0);
 
-    // Get auction from _id
     Auction storage auction = auctions[_auctionId];
 
-    // Set newBid
-    uint256 newBid;
-    if (auction.highestBidder == msg.sender) {
-      newBid = auction.highestBid + msg.value;
-    } else {
-      newBid = auction.allowed[msg.sender] + msg.value;
-    }
+    // Require newBid be greater than or equal to highestBid + bidIncrement
+    uint256 newBid = auction.fundsByBidder[msg.sender].add(msg.value);
+    require(newBid >= auction.highestBid + auction.bidIncrement);
 
-    // Require newBid be more than highestBid
-    require(newBid > auction.highestBid);
-
-    // Update allowed mapping
-    if (auction.highestBidder != msg.sender) {
-      auction.allowed[auction.highestBidder] = auction.highestBid;
-      auction.allowed[msg.sender] = 0;
-    }
-    auction.highestBidder = msg.sender;
+    // Update fundsByBidder mapping
     auction.highestBid = newBid;
+    auction.highestBidder = msg.sender;
+    auction.fundsByBidder[auction.highestBidder] = newBid;
 
     // Emit BidCreated event
     BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+    return true;
+  }
+
+  // @dev Allow people to withdraw their balances or the NFT
+  function withdrawBalance(uint256 _auctionId) external returns (bool success) {
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
+
+    Auction storage auction = auctions[_auctionId];
+    address fundsFrom;
+    uint withdrawalAmount;
+
+    // The seller gets receives highest bid when the auction is completed.
+    if (msg.sender == auction.seller) {
+      require(_status == AuctionStatus.Completed);
+      fundsFrom = auction.highestBidder;
+      withdrawalAmount = auction.highestBid;
+
+      // TODO: The auction house gets a cut of the withdrawal amount.
+    }
+    // Highest bidder can only withdraw the NFT when the auction is completed.
+    // When the auction is cancelled, the highestBidder is set to address(0).
+    else if (msg.sender == auction.highestBidder) {
+      require(_status == AuctionStatus.Completed);
+      _transfer(auction.nftAddress, auction.highestBidder, auction.tokenId);
+      AuctionNFTWithdrawal(_auctionId, auction.nftAddress, auction.tokenId, msg.sender);
+      return true;
+    }
+    // Anyone else gets what they bid
+    else {
+      fundsFrom = msg.sender;
+      withdrawalAmount = auction.fundsByBidder[fundsFrom];
+    }
+
+    require(withdrawalAmount > 0);
+    auction.fundsByBidder[fundsFrom].sub(withdrawalAmount);
+    msg.sender.transfer(withdrawalAmount);
+
+    AuctionFundWithdrawal(
+      _auctionId,
+      auction.nftAddress,
+      auction.tokenId,
+      msg.sender,
+      withdrawalAmount
+    );
+    return true;
   }
 
   function cancelAuction(address _nftAddress, uint256 _tokenId) external {
@@ -178,9 +216,16 @@ contract AuctionBase is Pausable {
     _cancelAuction(auctionId);
   }
 
-  function cancelAuction(uint256 _id) external {
-    _cancelAuction(_id);
+  function cancelAuction(uint256 _auctionId) external {
+    _cancelAuction(_auctionId);
   }
+
+  /// @dev Reject all Ether from being sent here
+  function() external payable {
+    revert();
+  }
+
+  // Internal functions
 
   /// @dev Transfers an NFT owned by this contract to another address.
   /// Returns true if the transfer succeeds.
@@ -202,6 +247,7 @@ contract AuctionBase is Pausable {
   {
     Auction storage auction = auctions[_auctionId];
     auction.cancelled = true;
+    auction.highestBidder = address(0);
 
     _removeAuction(auction.nftAddress, auction.tokenId);
     _transfer(auction.nftAddress, auction.seller, auction.tokenId);
@@ -214,6 +260,26 @@ contract AuctionBase is Pausable {
     delete nftToTokenIdToAuctionId[_nft][_tokenId];
   }
 
+  function _getAuctionStatus(uint256 _auctionId)
+    internal
+    view
+    returns (AuctionStatus)
+  {
+    Auction storage auction = auctions[_auctionId];
+
+    if (auction.cancelled) {
+      return AuctionStatus.Cancelled;
+    }
+    else if (auction.startBlock + auction.duration < block.number) {
+      return AuctionStatus.Completed;
+    }
+    else {
+      return AuctionStatus.Active;
+    }
+  }
+
+  // Modifiers
+
   modifier onlySeller(uint256 _auctionId) {
     Auction memory auction = auctions[_auctionId];
     require(msg.sender == auction.seller);
@@ -223,22 +289,5 @@ contract AuctionBase is Pausable {
   modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
     require(expectedStatus == _getAuctionStatus(_auctionId));
     _;
-  }
-
-  function _getAuctionStatus(uint256 _auctionId) internal view returns (AuctionStatus) {
-    Auction storage auction = auctions[_auctionId];
-
-    if (auction.cancelled) {
-      return AuctionStatus.Cancelled;
-    } else if (auction.startBlock + auction.duration < block.number) {
-      return AuctionStatus.Completed;
-    } else {
-      return AuctionStatus.Active;
-    }
-  }
-
-  /// @dev Reject all Ether from being sent here
-  function() external payable {
-    revert();
   }
 }
