@@ -35,5 +35,3 @@ yarn start
 To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [registry repo](https://github.com/hillstreetlabs/registry)
 
 After migrating the registry contracts, copy the `address` for `HillCore.sol` into `app/ERC821Contracts/contracts/HillCore.js`
-
-
