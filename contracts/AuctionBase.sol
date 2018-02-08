@@ -9,7 +9,7 @@ contract AuctionBase is Pausable {
 
   // Active: Auction is accepting bids and is not cancelled.
   // Cancelled: The seller cancelled the auction.
-  // Completed: Winning bid decided, but NFT and balance transfers are yet to happen.
+  // Completed: Winning bid decided, but NFT and bid transfers are yet to happen.
   enum AuctionStatus { Active, Cancelled, Completed }
 
   struct Auction {
@@ -19,11 +19,11 @@ contract AuctionBase is Pausable {
     address seller; // Current owner of NFT
     uint128 bidIncrement; // Minimum bid increment (in Wei)
     uint256 duration; // Block count for when the auction ends
-    uint256 startBlock; // Block number when auction started (0 if auction is completed)
+    uint256 startBlock; // Block number when auction started
     uint256 startedAt; // Approximate time for when the auction was started
 
     // state
-    mapping (address => uint256) fundsByBidder; // Mapping of addresses to balance to withdraw
+    mapping (address => uint256) fundsByBidder; // Mapping of addresses to funds
     uint256 highestBid; // Current highest bid
     address highestBidder; // Address of current highest bidder
     bool cancelled; // Flag for cancelled auctions
@@ -37,6 +37,7 @@ contract AuctionBase is Pausable {
   event AuctionSuccessful(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionCancelled(uint256 id, address nftAddress, uint256 tokenId);
   event BidCreated(uint256 id, address nftAddress, uint256 tokenId, address bidder, uint256 bid);
+  event AuctionWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer, uint256 amount);
 
   // External functions
 
@@ -47,7 +48,7 @@ contract AuctionBase is Pausable {
 
   // @dev Returns auction info for an NFT on auction.
   // @param _id - auction index
-  function getAuction(uint256 _id)
+  function getAuction(uint256 _auctionId)
     external
     view
     returns
@@ -64,10 +65,10 @@ contract AuctionBase is Pausable {
     uint256 highestBid,
     address highestBidder
   ) {
-    Auction memory _auction = auctions[_id];
-    AuctionStatus _status = _getAuctionStatus(_id);
+    Auction memory _auction = auctions[_auctionId];
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
     return (
-      _id,
+      _auctionId,
       _auction.nftAddress,
       _auction.tokenId,
       _auction.seller,
@@ -82,7 +83,11 @@ contract AuctionBase is Pausable {
   }
 
   // @dev Return bid for given auction ID and bidder
-  function getBid(uint256 _id, address bidder) external view returns (uint256 bid) {
+  function getBid(uint256 _id, address bidder)
+    external
+    view
+    returns (uint256 bid)
+  {
     Auction storage auction = auctions[_id];
     return auction.fundsByBidder[bidder];
   }
@@ -104,15 +109,13 @@ contract AuctionBase is Pausable {
     // Require msg.sender to own nft
     require(nftContract.ownerOf(_tokenId) == msg.sender);
 
-    // Require duration to be at least a minute
+    // Require duration to be at least a minute and calculate block count
     require(_duration >= 60);
-
     uint256 durationBlockCount = _duration / 14;
 
     // Put nft in escrow
     nftContract.transferFrom(msg.sender, this, _tokenId);
 
-    // Init auction
     Auction memory _auction = Auction({
       nftAddress: _nftAddress,
       tokenId: _tokenId,
@@ -125,28 +128,26 @@ contract AuctionBase is Pausable {
       highestBidder: address(0),
       cancelled: false
     });
-
     uint256 newAuctionId = auctions.push(_auction) - 1;
 
     // Add auction index to nftToTokenIdToAuctionId mapping
     nftToTokenIdToAuctionId[_nftAddress][_tokenId] = newAuctionId;
 
-    // Emit AuctionCreated event
     AuctionCreated(newAuctionId, _nftAddress, _tokenId);
   }
 
   // @dev Implements a simplified English auction
-  // Lets msg.sender to bid highestBid + bidIncrement and stores all bids in fundsByBidder
-  // TODO: Look into the experience of bidding in an English Auction asyncronous environment
+  // Lets msg.sender bid highestBid + bidIncrement and stores bids in fundsByBidder
+  // TODO: Look into the experience of bidding in an English Auction asyncronously
   function bid(uint256 _auctionId)
     external
     payable
     whenNotPaused
     statusIs(AuctionStatus.Active, _auctionId)
+    returns (bool success)
   {
     require(msg.value > 0);
 
-    // Get auction from _id
     Auction storage auction = auctions[_auctionId];
 
     // Require newBid be greater than or equal to highestBid + bidIncrement
@@ -160,11 +161,62 @@ contract AuctionBase is Pausable {
 
     // Emit BidCreated event
     BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+    return true;
   }
 
-  @dev Allow people to withdraw their balances
-  function withdrawBalance(uint256 _id) external {
+  // @dev Allow people to withdraw their balances or the NFT
+  function withdrawBalance(uint256 _auctionId) external returns (bool success) {
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
 
+    // Don't let people withdraw before the auction is cancelled or completed
+    require(_status == AuctionStatus.Cancelled || _status == AuctionStatus.Completed);
+
+    Auction storage auction = auctions[_auctionId];
+    address withdrawalAccount;
+    uint withdrawalAmount;
+
+    if (canceled) {
+        // if the auction was canceled, everyone should simply be allowed to withdraw their funds
+        withdrawalAccount = msg.sender;
+        withdrawalAmount = fundsByBidder[withdrawalAccount];
+
+    } else {
+        // the auction finished without being canceled
+
+        if (msg.sender == owner) {
+            // the auction's owner should be allowed to withdraw the highestBindingBid
+            withdrawalAccount = highestBidder;
+            withdrawalAmount = highestBindingBid;
+            ownerHasWithdrawn = true;
+
+        } else if (msg.sender == highestBidder) {
+            // the highest bidder should only be allowed to withdraw the difference between their
+            // highest bid and the highestBindingBid
+            withdrawalAccount = highestBidder;
+            if (ownerHasWithdrawn) {
+                withdrawalAmount = fundsByBidder[highestBidder];
+            } else {
+                withdrawalAmount = fundsByBidder[highestBidder] - highestBindingBid;
+            }
+
+        } else {
+            // anyone who participated but did not win the auction should be allowed to withdraw
+            // the full amount of their funds
+            withdrawalAccount = msg.sender;
+            withdrawalAmount = fundsByBidder[withdrawalAccount];
+        }
+    }
+
+    if (withdrawalAmount == 0) throw;
+
+    fundsByBidder[withdrawalAccount] -= withdrawalAmount;
+
+    // send the funds
+    if (!msg.sender.send(withdrawalAmount)) throw;
+
+    AuctionWithdrawal(_auctionId, auction.nftAddress, auction.tokenId,
+      withdrawalAccount, withdrawalAmount);
+    return true;
   }
 
   function cancelAuction(address _nftAddress, uint256 _tokenId) external {
@@ -215,7 +267,11 @@ contract AuctionBase is Pausable {
     delete nftToTokenIdToAuctionId[_nft][_tokenId];
   }
 
-  function _getAuctionStatus(uint256 _auctionId) internal view returns (AuctionStatus) {
+  function _getAuctionStatus(uint256 _auctionId)
+    internal
+    view
+    returns (AuctionStatus)
+  {
     Auction storage auction = auctions[_auctionId];
 
     if (auction.cancelled) {
