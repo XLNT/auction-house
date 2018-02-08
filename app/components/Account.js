@@ -73,7 +73,7 @@ export default class Account extends Component {
   createAuction(id, currentAccount) {
     const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
     this.auction
-      .createAuction(this.hillCoreInstance.address, id, bidIncrement, 1000, {
+      .createAuction(this.hillCoreInstance.address, id, bidIncrement, 100000000000, {
         from: currentAccount
       })
       .then(res => {
