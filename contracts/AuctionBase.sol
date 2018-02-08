@@ -23,7 +23,7 @@ contract AuctionBase is Pausable {
     uint256 startedAt; // Approximate time for when the auction was started
 
     // state
-    mapping (address => uint256) allowed; // Mapping of addresses to balance to withdraw
+    mapping (address => uint256) fundsByBidder; // Mapping of addresses to balance to withdraw
     uint256 highestBid; // Current highest bid
     address highestBidder; // Address of current highest bidder
     bool cancelled; // Flag for cancelled auctions
@@ -37,6 +37,8 @@ contract AuctionBase is Pausable {
   event AuctionSuccessful(uint256 id, address nftAddress, uint256 tokenId);
   event AuctionCancelled(uint256 id, address nftAddress, uint256 tokenId);
   event BidCreated(uint256 id, address nftAddress, uint256 tokenId, address bidder, uint256 bid);
+
+  // External functions
 
   // @dev Retrieve auctions count
   function getAuctionsCount() public view returns (uint256) {
@@ -82,14 +84,8 @@ contract AuctionBase is Pausable {
   // @dev Return bid for given auction ID and bidder
   function getBid(uint256 _id, address bidder) external view returns (uint256 bid) {
     Auction storage auction = auctions[_id];
-    if (auction.highestBidder == bidder) return auction.highestBid;
-    return auction.allowed[bidder];
+    return auction.fundsByBidder[bidder];
   }
-
-  // TODO
-  // @dev Allow people to withdraw their balances
-  // function withdrawBalance(uint256 _id) external {
-  // }
 
   // @dev Creates and begins a new auction.
   // @_duration is in seconds and is converted to block count.
@@ -139,6 +135,9 @@ contract AuctionBase is Pausable {
     AuctionCreated(newAuctionId, _nftAddress, _tokenId);
   }
 
+  // @dev Implements a simplified English auction
+  // Lets msg.sender to bid highestBid + bidIncrement and stores all bids in fundsByBidder
+  // TODO: Look into the experience of bidding in an English Auction asyncronous environment
   function bid(uint256 _auctionId)
     external
     payable
@@ -150,27 +149,22 @@ contract AuctionBase is Pausable {
     // Get auction from _id
     Auction storage auction = auctions[_auctionId];
 
-    // Set newBid
-    uint256 newBid;
-    if (auction.highestBidder == msg.sender) {
-      newBid = auction.highestBid + msg.value;
-    } else {
-      newBid = auction.allowed[msg.sender] + msg.value;
-    }
+    // Require newBid be greater than or equal to highestBid + bidIncrement
+    uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
+    require(newBid >= auction.highestBid + auction.bidIncrement);
 
-    // Require newBid be more than highestBid
-    require(newBid > auction.highestBid);
-
-    // Update allowed mapping
-    if (auction.highestBidder != msg.sender) {
-      auction.allowed[auction.highestBidder] = auction.highestBid;
-      auction.allowed[msg.sender] = 0;
-    }
-    auction.highestBidder = msg.sender;
+    // Update fundsByBidder mapping
     auction.highestBid = newBid;
+    auction.highestBidder = msg.sender;
+    auction.fundsByBidder[auction.highestBidder] = newBid;
 
     // Emit BidCreated event
     BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+  }
+
+  @dev Allow people to withdraw their balances
+  function withdrawBalance(uint256 _id) external {
+
   }
 
   function cancelAuction(address _nftAddress, uint256 _tokenId) external {
@@ -181,6 +175,13 @@ contract AuctionBase is Pausable {
   function cancelAuction(uint256 _id) external {
     _cancelAuction(_id);
   }
+
+  /// @dev Reject all Ether from being sent here
+  function() external payable {
+    revert();
+  }
+
+  // Internal functions
 
   /// @dev Transfers an NFT owned by this contract to another address.
   /// Returns true if the transfer succeeds.
@@ -214,17 +215,6 @@ contract AuctionBase is Pausable {
     delete nftToTokenIdToAuctionId[_nft][_tokenId];
   }
 
-  modifier onlySeller(uint256 _auctionId) {
-    Auction memory auction = auctions[_auctionId];
-    require(msg.sender == auction.seller);
-    _;
-  }
-
-  modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
-    require(expectedStatus == _getAuctionStatus(_auctionId));
-    _;
-  }
-
   function _getAuctionStatus(uint256 _auctionId) internal view returns (AuctionStatus) {
     Auction storage auction = auctions[_auctionId];
 
@@ -237,8 +227,16 @@ contract AuctionBase is Pausable {
     }
   }
 
-  /// @dev Reject all Ether from being sent here
-  function() external payable {
-    revert();
+  // Modifiers
+
+  modifier onlySeller(uint256 _auctionId) {
+    Auction memory auction = auctions[_auctionId];
+    require(msg.sender == auction.seller);
+    _;
+  }
+
+  modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
+    require(expectedStatus == _getAuctionStatus(_auctionId));
+    _;
   }
 }
