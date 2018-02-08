@@ -3,6 +3,7 @@ import { action, observable, observe, autorun, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import BigNumber from "bignumber.js";
+import { Wrapper } from "../styles";
 
 @inject("store")
 @observer
@@ -66,7 +67,7 @@ export default class AuctionList extends Component {
 
   render() {
     return (
-      <div>
+      <Wrapper>
         <h1>Auctions ({this.auctionsLength.toString()} total)</h1>
         <ul>
           {this.auctions.map(auction => (
@@ -79,7 +80,7 @@ export default class AuctionList extends Component {
             </li>
           ))}
         </ul>
-      </div>
+      </Wrapper>
     );
   }
 }

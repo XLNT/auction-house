@@ -15,10 +15,6 @@ import {
   darken
 } from "../styles";
 
-const AuctionHeader = styled("div")`
-  border-bottom: 1px solid ${colors.black};
-`;
-
 const AuctionGallery = styled("div")`
   width: 100%;
   height: 400px;
@@ -156,10 +152,11 @@ export default class Auction extends Component {
 
     return (
       <Wrapper>
-        <AuctionHeader>
+        <Spacer />
+        <div>
           <AuctionHeading>Auction {id.toString()}</AuctionHeading>{" "}
           {isActive && <Badge color={colors.green}>LIVE</Badge>}
-        </AuctionHeader>
+        </div>
         <Spacer />
         <AuctionGallery />
         <Spacer />

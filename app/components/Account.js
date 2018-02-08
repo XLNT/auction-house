@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { observable, observe, action, autorun, computed } from "mobx";
 import BigNumber from "bignumber.js";
+import { Wrapper } from "../styles";
 
 @inject("store")
 @observer
@@ -73,9 +74,15 @@ export default class Account extends Component {
   createAuction(id, currentAccount) {
     const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
     this.auction
-      .createAuction(this.hillCoreInstance.address, id, bidIncrement, 100000000000, {
-        from: currentAccount
-      })
+      .createAuction(
+        this.hillCoreInstance.address,
+        id,
+        bidIncrement,
+        100000000000,
+        {
+          from: currentAccount
+        }
+      )
       .then(res => {
         console.log(res);
       });
@@ -84,7 +91,7 @@ export default class Account extends Component {
   render() {
     const { currentAccount } = this.props.store;
     return (
-      <div>
+      <Wrapper>
         <h1>Account {currentAccount}</h1>
         <div>
           Crypto Hills Balance: {this.cryptoHillsBalance.toString()} Hills
@@ -106,7 +113,7 @@ export default class Account extends Component {
             </li>
           ))}
         </ul>
-      </div>
+      </Wrapper>
     );
   }
 }
