@@ -180,6 +180,8 @@ contract AuctionBase is Pausable {
       require(_status == AuctionStatus.Completed);
       fundsFrom = auction.highestBidder;
       withdrawalAmount = auction.highestBid;
+
+      // TODO: The auction house gets a cut of the withdrawal amount.
     }
     // Highest bidder can only withdraw the NFT when the auction is completed.
     // When the auction is cancelled, the highestBidder is set to address(0).
