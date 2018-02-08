@@ -32,17 +32,8 @@ yarn
 yarn start
 ```
 
-To add an ERC721 CryptoHill to account index 1 on ganache, run :
+To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [registry repo](https://github.com/hillstreetlabs/registry)
 
-```
-node script.js
-```
+After migrating the registry contracts, copy the `address` for `HillCore.sol` into `app/ERC821Contracts/contracts/HillCore.js`
 
-This will add one CryptoHill, and open up a repl. You can add more hills by running this command in the repl:
 
-```
-hillCore.createPromoHill(1, 1, 1, acct1, {
-  from: acct0,
-  gas: 1000000
-});
-```

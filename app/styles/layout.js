@@ -1,5 +1,6 @@
+import React, { Component } from "react";
 import styled, { css } from "react-emotion";
-import { basePadding, screenWidth } from "../styles";
+import { basePadding, screenWidth, colors } from "../styles";
 
 const spacerSize = (pads, props) => {
   return css`
@@ -26,3 +27,26 @@ export const Wrapper = styled("div")`
   max-width: ${screenWidth}px;
   margin: auto;
 `;
+
+export const Line = styled("hr")`
+  margin: 0;
+  padding: 0;
+  height: 0;
+  border: 0 none;
+  border-bottom: 1px solid ${colors.lightBorderGrey};
+  width: 100%;
+`;
+
+export class Divider extends Component {
+  render() {
+    const { padded } = this.props;
+    const size = isNaN(padded) ? 1 : padded;
+    return (
+      <div>
+        {padded && <Spacer size={size} />}
+        <Line />
+        {padded && <Spacer size={size} />}
+      </div>
+    );
+  }
+}
