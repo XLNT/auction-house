@@ -44,7 +44,8 @@ export default class AuctionList extends Component {
       bidIncrement,
       duration,
       startedAt,
-      isActive,
+      startBlock,
+      status,
       highestBid,
       highestBidder
     ] = await this.auctionBase.getAuction(_id, currentBlock);
@@ -56,7 +57,8 @@ export default class AuctionList extends Component {
       bidIncrement,
       duration,
       startedAt,
-      isActive,
+      startBlock,
+      status,
       highestBid,
       highestBidder
     };
