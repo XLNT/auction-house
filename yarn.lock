@@ -1885,6 +1885,14 @@ ethjs-abi@0.1.8:
     js-sha3 "0.5.5"
     number-to-bn "1.7.0"
 
+ethjs-abi@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/ethjs-abi/-/ethjs-abi-0.2.1.tgz#e0a7a93a7e81163a94477bad56ede524ab6de533"
+  dependencies:
+    bn.js "4.11.6"
+    js-sha3 "0.5.5"
+    number-to-bn "1.7.0"
+
 event-emitter@~0.3.5:
   version "0.3.5"
   resolved "https://registry.yarnpkg.com/event-emitter/-/event-emitter-0.3.5.tgz#df8c69eef1647923c7157b9ce83840610b02cc39"
@@ -4903,3 +4911,10 @@ yargs@~3.10.0:
     cliui "^2.1.0"
     decamelize "^1.0.0"
     window-size "0.1.0"
+
+zeppelin-solidity@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/zeppelin-solidity/-/zeppelin-solidity-1.6.0.tgz#c1048de286124cdcdb7e2492c2890ddfde04dd84"
+  dependencies:
+    dotenv "^4.0.0"
+    ethjs-abi "^0.2.1"

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "../utils/Pausable.sol";
+import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
 /// @title A facet of HillCore that manages special access privileges.
 /// @author Hill Street Labs
