@@ -171,38 +171,28 @@ contract AuctionBase is Pausable {
   function withdrawBalance(uint256 _auctionId) external returns (bool success) {
     AuctionStatus _status = _getAuctionStatus(_auctionId);
 
-    // Don't let people withdraw before the auction is cancelled or completed
-    require(_status == AuctionStatus.Cancelled || _status == AuctionStatus.Completed);
-
     Auction storage auction = auctions[_auctionId];
     address fundsFrom;
     uint withdrawalAmount;
 
-    // Auction is cancelled
-    if (_status == AuctionStatus.Cancelled) {
+    // The seller gets receives highest bid when the auction is completed.
+    if (msg.sender == auction.seller) {
+      require(_status == AuctionStatus.Completed);
+      fundsFrom = auction.highestBidder;
+      withdrawalAmount = auction.highestBid;
+    }
+    // Highest bidder can only withdraw the NFT when the auction is completed.
+    // When the auction is cancelled, the highestBidder is set to address(0).
+    else if (msg.sender == auction.highestBidder) {
+      require(_status == AuctionStatus.Completed);
+      _transfer(auction.nftAddress, auction.highestBidder, auction.tokenId);
+      AuctionNFTWithdrawal(_auctionId, auction.nftAddress, auction.tokenId, msg.sender);
+      return true;
+    }
+    // Anyone else gets what they bid
+    else {
       fundsFrom = msg.sender;
       withdrawalAmount = auction.fundsByBidder[fundsFrom];
-    }
-    // Auction is completed
-    else {
-      // The seller gets the highest bid
-      if (msg.sender == auction.seller) {
-        require(_status == AuctionStatus.Completed);
-        fundsFrom = auction.highestBidder;
-        withdrawalAmount = auction.highestBid;
-      }
-      // Highest bidder can only withdraw the NFT
-      else if (msg.sender == auction.highestBidder) {
-        require(_status == AuctionStatus.Completed);
-        _transfer(auction.nftAddress, auction.highestBidder, auction.tokenId);
-        AuctionNFTWithdrawal(_auctionId, auction.nftAddress, auction.tokenId, msg.sender);
-        return true;
-      }
-      // Anyone else gets what they bid
-      else {
-        fundsFrom = msg.sender;
-        withdrawalAmount = auction.fundsByBidder[fundsFrom];
-      }
     }
 
     require(withdrawalAmount > 0);
@@ -255,6 +245,7 @@ contract AuctionBase is Pausable {
   {
     Auction storage auction = auctions[_auctionId];
     auction.cancelled = true;
+    auction.highestBidder = address(0);
 
     _removeAuction(auction.nftAddress, auction.tokenId);
     _transfer(auction.nftAddress, auction.seller, auction.tokenId);
