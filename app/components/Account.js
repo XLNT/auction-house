@@ -52,17 +52,7 @@ export default class Account extends Component {
     this.loadingHills = true;
     this.cryptoHills = [];
     if (!currentAccount || this.cryptoHillsBalance == 0) return false;
-    // const promises = [];
-    // for (let i = 0; i < this.cryptoHillsBalance; i++) {
-    //   promises.push(
-    //     this.hillCoreInstance
-    //       .tokensOfOwnerByIndex(currentAccount, i)
-    //       .then(res => {
-    //         return this.importCryptoHill(res, currentBlock);
-    //       })
-    //   );
-    // }
-    // this.cryptoHills = await Promise.all(promises);
+
     const assets = await hillCoreInstance.assetsOf(
       currentAccount,
       currentBlock
@@ -89,7 +79,8 @@ export default class Account extends Component {
   }
 
   approveTransfer(id, currentAccount) {
-    this.hillCoreInstance
+    const { hillCoreInstance } = this.props.store;
+    hillCoreInstance
       .approve(this.auction.address, id, {
         from: currentAccount
       })
@@ -99,17 +90,12 @@ export default class Account extends Component {
   }
 
   createAuction(id, currentAccount) {
-    const bidIncrement = this.props.store.web3.toWei(0.1, "ether");
+    const { hillCoreInstance, web3 } = this.props.store;
+    const bidIncrement = web3.toWei(0.1, "ether");
     this.auction
-      .createAuction(
-        this.hillCoreInstance.address,
-        id,
-        bidIncrement,
-        100000000000,
-        {
-          from: currentAccount
-        }
-      )
+      .createAuction(hillCoreInstance.address, id, bidIncrement, 100000000000, {
+        from: currentAccount
+      })
       .then(res => {
         console.log(res);
       });
