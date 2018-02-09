@@ -1,8 +1,15 @@
 # marketplace 🤝
 
-Bare bones auction client. Use the `AuctionFactory` to create auctions and place bids.
+Bare bones auction client. Use the `AuctionBase` to create auctions and place bids.
 
 ### Getting started
+
+Install packages and start server (I prefer using [yarn](https://yarnpkg.com/en/))
+
+```
+yarn
+yarn start
+```
 
 Start a local blockchain like [Ganache](https://github.com/trufflesuite/ganache). You can use [Ganache CLI](https://github.com/trufflesuite/ganache-cli) or the [desktop client](http://truffleframework.com/ganache/).
 
@@ -25,13 +32,6 @@ Compile and migrate your local smart contracts.
 truffle migrate --reset
 ```
 
-Install packages and start server (I prefer using [yarn](https://yarnpkg.com/en/))
-
-```
-yarn
-yarn start
-```
-
-To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [registry repo](https://github.com/hillstreetlabs/registry)
+To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [auction-admin repo](https://github.com/xlnt/auction-admin)
 
 After migrating the registry contracts, copy the `address` for `HillCore.sol` into `app/ERC821Contracts/contracts/HillCore.js`
