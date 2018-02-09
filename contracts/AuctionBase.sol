@@ -1,12 +1,16 @@
 pragma solidity ^0.4.18;
 
+import 'eip820/contracts/EIP820Registry.sol';
+import 'eip820/contracts/EIP820Implementer.sol';
 import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "./erc721/ERC721.sol";
+
+import "./ERC821.sol";
+import "./IAssetHolder.sol";
 
 /// @title AuctionBase
 /// @dev Contains models, variables, and internal methods for the auction.
-contract AuctionBase is Pausable {
+contract AuctionBase is Pausable, IAssetHolder, EIP820Implementer {
   using SafeMath for uint256;
 
   // Active: Auction is accepting bids and is not cancelled.
@@ -43,6 +47,12 @@ contract AuctionBase is Pausable {
   event AuctionFundWithdrawal(uint256 id, address nftAddress, uint256 tokenId, address withdrawer, uint256 amount);
 
   // External functions
+
+  // Constructor
+  function AuctionBase() public {
+    setInterfaceImplementation('IAssetHolder', this);
+    owner = msg.sender;
+  }
 
   // @dev Retrieve auctions count
   function getAuctionsCount() public view returns (uint256) {
@@ -107,7 +117,7 @@ contract AuctionBase is Pausable {
     whenNotPaused
   {
     // Get nft
-    ERC721 nftContract = ERC721(_nftAddress);
+    ERC821 nftContract = ERC821(_nftAddress);
 
     // Require msg.sender to own nft
     require(nftContract.ownerOf(_tokenId) == msg.sender);
@@ -117,7 +127,7 @@ contract AuctionBase is Pausable {
     uint256 durationBlockCount = _duration.div(uint256(14));
 
     // Put nft in escrow
-    nftContract.transferFrom(msg.sender, this, _tokenId);
+    nftContract.transfer(this, _tokenId);
 
     Auction memory _auction = Auction({
       nftAddress: _nftAddress,
@@ -220,6 +230,14 @@ contract AuctionBase is Pausable {
     _cancelAuction(_auctionId);
   }
 
+  function canImplementInterfaceForAddress(address addr, bytes32 interfaceHash) view public returns(bool) {
+    return true;
+  }
+
+  function onAssetReceived(uint256, address, address, bytes, address, bytes) public {
+    return /* 📨 */;
+  }
+
   /// @dev Reject all Ether from being sent here
   function() external payable {
     revert();
@@ -233,7 +251,7 @@ contract AuctionBase is Pausable {
   /// @param _receiver - Address to transfer NFT to.
   /// @param _tokenId - ID of token to transfer.
   function _transfer(address _nft, address _receiver, uint256 _tokenId) internal {
-    ERC721 nftContract = ERC721(_nft);
+    ERC821 nftContract = ERC821(_nft);
 
     // it will throw if transfer fails
     nftContract.transfer(_receiver, _tokenId);
