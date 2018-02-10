@@ -1,7 +1,6 @@
 import { action, observable } from "mobx";
 import contract from "truffle-contract";
-import AuctionBaseContract from "../../build/contracts/AuctionBase.json";
-import { HillCore } from "../contracts";
+import { AuctionBase, HillCore } from "../contracts";
 
 export default class Store {
   @observable currentAccount = null;
@@ -13,8 +12,13 @@ export default class Store {
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
     // Setup AuctionBase contract
-    this.AuctionBase = contract(AuctionBaseContract);
-    this.AuctionBase.setProvider(this.web3.currentProvider);
+    const AuctionBaseContract = contract({
+      abi: AuctionBase.abi
+    });
+    AuctionBaseContract.setProvider(this.web3.currentProvider);
+    AuctionBaseContract.at(AuctionBase.address).then(instance => {
+      this.auctionBaseInstance = instance;
+    });
 
     // Setup CryptoHills contract
     const HillCoreContract = contract({

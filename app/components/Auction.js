@@ -36,17 +36,31 @@ export default class Auction extends Component {
   @observable hideOwnBidWarning = false;
 
   async componentDidMount() {
-    this.auctionBase = await this.props.store.AuctionBase.deployed();
     const { auctionId } = this.props.match.params;
-    const watcher = observe(
-      this.props.store,
-      "currentBlock",
-      change => {
-        this.getAuction(auctionId);
-        this.getCurrentAccountBid(auctionId);
-      },
-      true // invoke immediately
+    this.auctionBaseWatcher = when(
+      () => this.props.store.auctionBaseInstance,
+      () => {
+        this.blockWatcher = observe(
+          this.props.store,
+          "currentBlock",
+          change => {
+            this.getAuction(auctionId);
+            this.getCurrentAccountBid(auctionId);
+          },
+          true // invoke immediately
+        );
+      }
     );
+  }
+
+  componentWillUnmount() {
+    if (this.auctionBaseWatcher) {
+      this.auctionBaseWatcher();
+    }
+
+    if (this.blockWatcher) {
+      this.blockWatcher();
+    }
   }
 
   @action
