@@ -109,6 +109,14 @@ export default class AuctionBidBox extends Component {
     this.props.bidCallback(this.newBid);
   }
 
+  withdrawFunds() {
+    this.props.withdrawCallback();
+  }
+
+  withdrawArt() {
+    this.props.withdrawArtCallback();
+  }
+
   @action
   updateBid(newBid) {
     this.newBid = newBid;
@@ -159,6 +167,11 @@ export default class AuctionBidBox extends Component {
     return this.highestBid.toNumber() == 0;
   }
 
+  @computed
+  get userIsWinner() {
+    return this.highestBidder == this.props.store.currentAccount;
+  }
+
   render() {
     return (
       <Centered>
@@ -179,7 +192,6 @@ export default class AuctionBidBox extends Component {
                   <SectionTitle>Highest Bid</SectionTitle>
                   <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
                 </ContainerSection>
-
                 <Line />
               </span>
             )}
@@ -193,7 +205,7 @@ export default class AuctionBidBox extends Component {
                 <Line />
               </span>
             )}
-          {this.props.statusText === "Cancelled" && (
+          {this.props.statusText === "Live" && (
             <ContainerSection>
               <SectionTitle>Place Bid</SectionTitle>
 
@@ -230,6 +242,36 @@ export default class AuctionBidBox extends Component {
                   <Explanation>
                     Unfortunately, this auction has been cancelled. Please
                     withdraw your funds.
+                  </Explanation>
+
+                  <ActionButton onClick={() => this.withdrawFunds()}>
+                    Withdraw
+                  </ActionButton>
+                  <Spacer />
+                </span>
+              )}
+            </ContainerSection>
+          )}
+          {this.props.statusText === "Completed" && (
+            <ContainerSection>
+              {this.userIsWinner ? (
+                <span>
+                  <SectionTitle>Withdraw Art</SectionTitle>
+                  <Explanation>
+                    Congratulations, you won the auction!
+                  </Explanation>
+
+                  <ActionButton onClick={() => this.withdrawArt()}>
+                    Claim Your Artwork
+                  </ActionButton>
+                  <Spacer />
+                </span>
+              ) : (
+                <span>
+                  <SectionTitle>Withdraw Funds</SectionTitle>
+                  <Explanation>
+                    Sorry you didn't win the auction. Please withdraw your
+                    funds.
                   </Explanation>
 
                   <ActionButton onClick={() => this.withdrawFunds()}>
