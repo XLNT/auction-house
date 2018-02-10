@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Provider } from "mobx-react";
 
-import Nav from "./Nav";
+import Header from "./Header";
 import Account from "./Account";
 import AuctionList from "./AuctionList";
 import Auction from "./Auction";
@@ -14,7 +14,7 @@ export default class App extends Component {
       <Provider store={this.props.store}>
         <Router>
           <div>
-            <Nav />
+            <Header />
             <Route
               path="/account"
               component={props => (
