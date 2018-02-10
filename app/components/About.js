@@ -32,7 +32,7 @@ export default class About extends Component {
     "A community for cryptocollectibles",
     "A social, p2p trading layer for cryptocollectibles",
     "All built on the open standards you know and love",
-    "A series of partnerships and experiments to answer that question of “what’s next”"
+    "A series of experiments to answer the question of “what’s next”"
   ];
 
   componentWillMount() {

@@ -4,7 +4,7 @@ import { Provider } from "mobx-react";
 
 import Account from "./Account";
 import Header from "./Header";
-import AuctionList from "./AuctionList";
+import Home from "./Home";
 import Auction from "./Auction";
 import About from "./About";
 import LoginRequired from "./LoginRequired";
@@ -26,7 +26,7 @@ export default class App extends Component {
             />
             <Route path="/auction/:auctionId" component={Auction} />
             <Route exact path="/about" component={About} />
-            <Route exact path="/" component={AuctionList} />
+            <Route exact path="/" component={Home} />
           </div>
         </Router>
       </Provider>

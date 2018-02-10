@@ -33,6 +33,18 @@ export const Wrapper = styled("div")`
   `};
 `;
 
+export const LeftContainer = styled("div")`
+  width: ${props => (props.width ? props.width : `100`)}%;
+  float: left;
+  padding: ${basePadding / 2}px;
+`;
+
+export const RightContainer = styled("div")`
+  width: ${props => (props.width ? props.width : `100`)}%;
+  float: right;
+  padding: ${basePadding / 2}px;
+`;
+
 export const Line = styled("hr")`
   margin: 0;
   padding: 0;

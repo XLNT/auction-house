@@ -3,11 +3,29 @@ import { action, autorun, observable, observe, runInAction, when } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import BigNumber from "bignumber.js";
-import { Wrapper } from "../styles";
+import {
+  Wrapper,
+  Spacer,
+  colors,
+  LeftContainer,
+  RightContainer,
+  Button
+} from "../styles";
+import {
+  Container,
+  Status,
+  StatusPulse,
+  Gallery,
+  Heading,
+  Description,
+  SellerInformation
+} from "./auction/auction";
+import CountDown from "./CountDown";
+import test from "../images/test.png";
 
 @inject("store")
 @observer
-export default class AuctionList extends Component {
+export default class Home extends Component {
   @observable auctions = [];
   @observable auctionsLength = new BigNumber(0);
 
@@ -98,21 +116,57 @@ export default class AuctionList extends Component {
     };
   }
 
+  statusText(status) {
+    if (status.equals(0)) return "Live";
+    else if (status.equals(1)) return "Cancelled";
+    else return "Completed";
+  }
+
+  statusColor(status) {
+    if (status.equals(0)) return colors.green;
+    else if (status.equals(1)) return colors.yellow;
+    else return colors.blue;
+  }
+
   render() {
+    const auctionOfInterest = this.auctions[0];
+    console.log(auctionOfInterest);
+
+    if (!auctionOfInterest) return null;
+
     return (
       <Wrapper>
-        <h1>Auctions ({this.auctionsLength.toString()} total)</h1>
-        <ul>
-          {this.auctions.map(auction => (
-            <li key={auction.id.toString()}>
-              <Link to={`/auction/${auction.id.toString()}`}>
-                <b>Auction {auction.id.toString()}</b> selling NFT{" "}
-                {auction.tokenId.toString()} from contract {auction.nftAddress}{" "}
-                with current highest bid: {auction.highestBid.toString()}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Spacer size={3} />
+        <Container style={{ color: `white` }}>
+          <LeftContainer width={40}>
+            <Status>
+              <StatusPulse color={this.statusColor(auctionOfInterest.status)} />{" "}
+              {this.statusText(auctionOfInterest.status)}
+            </Status>
+            <Spacer size={0.5} />
+
+            <Heading>Auction #{auctionOfInterest.id.toString()}</Heading>
+            <SellerInformation>by {auctionOfInterest.seller}</SellerInformation>
+            <Spacer size={0.5} />
+
+            <Description>
+              NFT: {auctionOfInterest.tokenId.toString()}@{
+                auctionOfInterest.nftAddress
+              }
+            </Description>
+            <Spacer />
+            <CountDown endDate={new Date().getTime() + 100000000} />
+
+            <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
+              <Button>View</Button>
+            </Link>
+          </LeftContainer>
+          <RightContainer width={55}>
+            <Gallery>
+              <img src={test} />
+            </Gallery>
+          </RightContainer>
+        </Container>
       </Wrapper>
     );
   }
