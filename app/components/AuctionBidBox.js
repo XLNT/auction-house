@@ -109,8 +109,6 @@ export default class AuctionBidBox extends Component {
 
   @action
   updateBid(newBid) {
-    console.log(this.newBid.toNumber());
-    console.log(this.props.bidIncrement.toNumber());
     this.newBid = newBid;
   }
 

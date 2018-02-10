@@ -45,7 +45,8 @@ export default class Auction extends Component {
           change => {
             this.getAuction(auctionId);
             this.getCurrentAccountBid(auctionId);
-          }
+          },
+          true // invoke immediately
         );
       }
     );

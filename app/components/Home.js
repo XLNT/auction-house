@@ -6,6 +6,7 @@ import BigNumber from "bignumber.js";
 import {
   Wrapper,
   Spacer,
+  Divider,
   colors,
   LeftContainer,
   RightContainer,
@@ -130,8 +131,6 @@ export default class Home extends Component {
 
   render() {
     const auctionOfInterest = this.auctions[0];
-    console.log(auctionOfInterest);
-
     if (!auctionOfInterest) return null;
 
     return (
@@ -154,9 +153,9 @@ export default class Home extends Component {
                 auctionOfInterest.nftAddress
               }
             </Description>
-            <Spacer />
+            <Divider padded={1.5} />
             <CountDown endDate={new Date().getTime() + 100000000} />
-
+            <Spacer />
             <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
               <Button>View</Button>
             </Link>
