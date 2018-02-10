@@ -41,7 +41,8 @@ export default class Home extends Component {
           "currentBlock",
           change => {
             this.getAuctionsLength();
-          }
+          },
+          true // invoke immediately
         );
       }
     );
@@ -139,8 +140,8 @@ export default class Home extends Component {
         <Container style={{ color: `white` }}>
           <LeftContainer width={40}>
             <Status>
-              <StatusPulse color={this.statusColor(auctionOfInterest.status)} />{" "}
-              {this.statusText(auctionOfInterest.status)}
+              {this.statusText(auctionOfInterest.status)}{" "}
+              <StatusPulse color={this.statusColor(auctionOfInterest.status)} />
             </Status>
             <Spacer size={0.5} />
 

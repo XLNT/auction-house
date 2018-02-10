@@ -96,15 +96,8 @@ export default class AuctionBidBox extends Component {
     return newBid.gte(this.minBid);
   }
 
-  @action
-  async placeBid() {
-    const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = this.newBid.minus(this.props.currentAccountBid);
-    const params = {
-      from: this.props.store.currentAccount,
-      value: adjustedBid
-    };
-    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
+  submitBid() {
+    this.props.callback(this.newBid);
   }
 
   @action
@@ -180,7 +173,7 @@ export default class AuctionBidBox extends Component {
               </BidButton>
             </SectionData>
             <br />
-            <ActionButton onClick={() => this.placeBid()}>
+            <ActionButton onClick={() => this.submitBid()}>
               Place Bid
             </ActionButton>
             {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
@@ -194,5 +187,6 @@ export default class AuctionBidBox extends Component {
 AuctionBidBox.propTypes = {
   highestBid: PropTypes.object.isRequired,
   highestBidder: PropTypes.string.isRequired,
-  bidIncrement: PropTypes.object.isRequired
+  bidIncrement: PropTypes.object.isRequired,
+  callback: PropTypes.func.isRequired
 };

@@ -2,12 +2,11 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Provider } from "mobx-react";
 
-import Account from "./Account";
 import Header from "./Header";
 import Home from "./Home";
 import Auction from "./Auction";
 import About from "./About";
-import LoginRequired from "./LoginRequired";
+import MetamaskRequired from "./MetamaskRequired";
 
 export default class App extends Component {
   render() {
@@ -17,14 +16,13 @@ export default class App extends Component {
           <div>
             <Header />
             <Route
-              path="/account"
+              path="/auction/:auctionId"
               component={props => (
-                <LoginRequired>
-                  <Account {...props} />
-                </LoginRequired>
+                <MetamaskRequired>
+                  <Auction {...props} />
+                </MetamaskRequired>
               )}
             />
-            <Route path="/auction/:auctionId" component={Auction} />
             <Route exact path="/about" component={About} />
             <Route exact path="/" component={Home} />
           </div>

@@ -11,12 +11,12 @@ import {
   transform
 } from "../../styles";
 
-function pulseBuilder(degree) {
+function pulseBuilder() {
   const pulse = keyframes`
     0% { -webkit-transform: scale(0) }
     100% {
-      -webkit-transform: scale(1.0);
-      opacity: 0;
+      -webkit-transform: scale(0.75);
+      opacity: 50;
     }
   `;
   return pulse;
@@ -45,7 +45,7 @@ export const StatusPulse = styled("div")`
   display: inline-block;
   margin-bottom 2px;
   border-radius: 100%;
-  animation: ${pulseBuilder(10)} 1.5s infinite ease-in-out;
+  animation: ${pulseBuilder()} 1.5s infinite ease-in-out;
 `;
 
 export const Heading = styled("span")`

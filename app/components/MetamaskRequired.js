@@ -3,7 +3,7 @@ import { observer, inject } from "mobx-react";
 
 @inject("store")
 @observer
-export default class LoginRequired extends Component {
+export default class MetamaskRequired extends Component {
   render() {
     return this.props.children;
     const { currentAccount, currentNetwork } = this.props.store;
