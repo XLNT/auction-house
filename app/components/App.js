@@ -5,6 +5,7 @@ import Nav from "./Nav";
 import Account from "./Account";
 import AuctionList from "./AuctionList";
 import Auction from "./Auction";
+import AccountLogin from "./AccountLogin";
 
 export default class App extends Component {
   render() {
@@ -13,7 +14,14 @@ export default class App extends Component {
         <Router>
           <div>
             <Nav />
-            <Route path="/account" component={Account} />
+            <Route
+              path="/account"
+              component={props => (
+                <AccountLogin>
+                  <Account {...props} />
+                </AccountLogin>
+              )}
+            />
             <Route path="/auction/:auctionId" component={Auction} />
             <Route exact path="/" component={AuctionList} />
           </div>

@@ -5,12 +5,14 @@ import { HillCore } from "../contracts";
 
 export default class Store {
   @observable currentAccount = null;
+  @observable currentNetwork = null;
   @observable currentBlock = "latest";
   @observable hillCoreInstance = null;
 
   constructor(web3) {
     this.web3 = web3;
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
+    this.networkInterval = setInterval(() => this.setNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
     // Setup AuctionBase contract
     this.AuctionBase = contract(AuctionBaseContract);
@@ -33,6 +35,12 @@ export default class Store {
         this.currentAccount = accounts[0];
       })
     );
+  }
+
+  setNetwork() {
+    web3.version.getNetwork((err, network) => {
+      this.currentNetwork = network;
+    })
   }
 
   setCurrentBlock() {
