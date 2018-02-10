@@ -12,28 +12,75 @@ import {
   Divider,
   Centered,
   basePadding,
-  colors
+  colors,
+  lighten
 } from "../styles";
 
 import CountDown from "./CountDown";
 
 const Container = styled("div")`
-  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+  border-radius: 8px;
   display: block;
+  background-color: white;
 `;
 
 const ContainerSection = styled("div")`
-  border-bottom: 1px solid ${colors.grey}
-  padding: ${basePadding}px;
+  padding: ${basePadding}px ${basePadding / 2}px;
   display: block;
-  &:last-child {
-    border-bottom: 0 none;
-  }
 `;
 
 const SectionTitle = styled("div")`
   text-transform: uppercase;
+  font-size: 16px;
+  font-weight: normal;
+  color: ${colors.darkGrey};
+`;
+
+const SectionData = styled("div")`
+  font-size: 40px;
+  font-weight: bold;
+`;
+
+const BidButton = styled("button")`
+  display: inline-block;
+  background-color: black;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  transform: translateY(-8px);
+
+  &:hover {
+    background-color: ${lighten(`black`, 25)};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const ActionButton = styled("button")`
+  display: inline-block;
+  background-color: ${colors.white};
+  border: 1px solid ${colors.darkGrey};
+  padding: ${basePadding / 2}px ${basePadding}px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  background-color: black;
+  color: white;
+  text-transform: uppercase;
+
+  &:hover {
+    background-color: ${lighten(`black`, 25)};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 @inject("store")
@@ -52,30 +99,19 @@ export default class AuctionBidBox extends Component {
   @action
   async placeBid() {
     const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = this.newBid.minus(this.currentAccountBid);
+    const adjustedBid = this.newBid.minus(this.props.currentAccountBid);
     const params = {
       from: this.props.store.currentAccount,
       value: adjustedBid
     };
     const receipt = await auctionBaseInstance.bid(this.auction.id, params);
-    this.hideOwnBidWarning = false;
-  }
-
-  @action
-  hideBidWarning() {
-    this.hideOwnBidWarning = true;
   }
 
   @action
   updateBid(newBid) {
+    console.log(this.newBid.toNumber());
+    console.log(this.props.bidIncrement.toNumber());
     this.newBid = newBid;
-  }
-
-  @computed
-  get showBidBox() {
-    const ownHighestBid =
-      this.auction.highestBidder == this.props.store.currentAccount;
-    return !ownHighestBid || this.hideOwnBidWarning;
   }
 
   @computed
@@ -98,51 +134,61 @@ export default class AuctionBidBox extends Component {
     return this.props.store.web3.fromWei(this.newBid, "ether");
   }
 
-  // {this.showBidBox ? (
-  //   <AuctionBidBox
-  //     highestBid={highestBid}
-  //     highestBidder={highestBidder}
-  //     bidIncrement={bidIncrement}
-  //   />
-  // ) : (
-  //   <span>
-  //     <b>🎉 You're the highest bidder!</b> <Spacer />
-  //     <a
-  //       style={{ color: "#111" }}
-  //       onClick={() => this.hideBidWarning()}
-  //     >
-  //       Bid higher?
-  //     </a>
-  //   </span>
-  // )}
+  @computed
+  get highestBid() {
+    return this.props.store.web3.fromWei(this.props.highestBid, "ether");
+  }
+
+  @computed
+  get currentBid() {
+    return this.props.store.web3.fromWei(this.props.currentAccountBid, "ether");
+  }
 
   render() {
     return (
-      <div>
+      <Centered>
         <Container>
           <ContainerSection>
+            <SectionTitle> Time Left</SectionTitle>
             <CountDown endDate={new Date().getTime() + 100000000} />
+          </ContainerSection>
+
+          <ContainerSection>
+            <SectionTitle>Highest Bid</SectionTitle>
+            <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
+          </ContainerSection>
+
+          <ContainerSection>
+            <SectionTitle>Your Bid</SectionTitle>
+            <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
+          </ContainerSection>
+
+          <ContainerSection>
             <SectionTitle>Place Bid</SectionTitle>
-            <Centered>
-              <Button
+
+            <SectionData>
+              <BidButton
                 disabled={!this.bidIsValid(this.downBid)}
                 onClick={() => this.updateBid(this.downBid)}
               >
                 -
-              </Button>{" "}
-              <span>{this.newEthBid.toNumber()} ETH</span>{" "}
-              <Button
+              </BidButton>{" "}
+              {this.newEthBid.toNumber()} ETH{" "}
+              <BidButton
                 disabled={!this.bidIsValid(this.upBid)}
                 onClick={() => this.updateBid(this.upBid)}
               >
                 +
-              </Button>{" "}
-              <Button onClick={() => this.placeBid()}>Place Bid!!</Button>
-              {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
-            </Centered>
+              </BidButton>
+            </SectionData>
+            <br />
+            <ActionButton onClick={() => this.placeBid()}>
+              Place Bid
+            </ActionButton>
+            {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
           </ContainerSection>
         </Container>
-      </div>
+      </Centered>
     );
   }
 }

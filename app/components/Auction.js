@@ -36,16 +36,15 @@ const Container = styled("div")`
 `;
 
 const MetadataContainer = styled("div")`
-  width: 65%;
+  width: 60%;
   float: left;
 `;
 
 const BidContainer = styled("div")`
-  width: 30%;
+  width: 35%;
   float: right;
   padding-left: ${basePadding}px;
   padding-right: ${basePadding}px;
-  background-color: ${colors.yellow};
 `;
 
 const Status = styled("div")`
@@ -91,6 +90,7 @@ const Gallery = styled("div")`
   background-color: ${colors.green};
   & img {
     height: 400px;
+    width: 100%;
   }
 `;
 
@@ -243,6 +243,7 @@ export default class Auction extends Component {
               highestBid={highestBid}
               highestBidder={highestBidder}
               bidIncrement={bidIncrement}
+              currentAccountBid={this.currentAccountBid}
             />
           </BidContainer>
         </Container>

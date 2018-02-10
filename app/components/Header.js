@@ -69,7 +69,7 @@ export default class Header extends Component {
 
           <FloatRight>
             <HeaderText>
-              <Link to="/invite">Invite</Link>
+              <Link to="/">Auctions</Link>
             </HeaderText>
 
             <HeaderText>

@@ -1,6 +1,12 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, observable, computed } from "mobx";
+import styled from "react-emotion";
+
+const Timer = styled("div")`
+  font-size: 40px;
+  font-weight: bold;
+`;
 
 @inject("store")
 @observer
@@ -58,9 +64,9 @@ export default class Countdown extends Component {
 
   render() {
     return (
-      <div>
-        {this.minutes}, {this.seconds}
-      </div>
+      <Timer>
+        {this.days} : {this.hours} : {this.minutes} : {this.seconds}
+      </Timer>
     );
   }
 }
