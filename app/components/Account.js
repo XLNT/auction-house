@@ -12,10 +12,11 @@ export default class Account extends Component {
   @observable cryptoHillsBalance = new BigNumber(0);
 
   async componentDidMount() {
-    this.auction = await this.props.store.AuctionBase.deployed();
     window.s = this;
-    this.hillCoreWatcher = when(
-      () => this.props.store.hillCoreInstance,
+    this.accountWatcher = when(
+      () =>
+        this.props.store.hillCoreInstance &&
+        this.props.store.auctionBaseInstance,
       () => {
         this.blockWatcher = observe(
           this.props.store,
@@ -33,8 +34,8 @@ export default class Account extends Component {
   }
 
   componentWillUnmount() {
-    if (this.hillCoreWatcher) {
-      this.hillCoreWatcher();
+    if (this.accountWatcher) {
+      this.accountWatcher();
     }
 
     if (this.blockWatcher) {
@@ -79,9 +80,9 @@ export default class Account extends Component {
   }
 
   approveTransfer(id, currentAccount) {
-    const { hillCoreInstance } = this.props.store;
+    const { auctionBaseInstance, hillCoreInstance } = this.props.store;
     hillCoreInstance
-      .approve(this.auction.address, id, {
+      .approve(auctionBaseInstance.address, id, {
         from: currentAccount
       })
       .then(res => {
@@ -90,9 +91,9 @@ export default class Account extends Component {
   }
 
   createAuction(id, currentAccount) {
-    const { hillCoreInstance, web3 } = this.props.store;
+    const { auctionBaseInstance, hillCoreInstance, web3 } = this.props.store;
     const bidIncrement = web3.toWei(0.1, "ether");
-    this.auction
+    auctionBaseInstance
       .createAuction(hillCoreInstance.address, id, bidIncrement, 100000000000, {
         from: currentAccount
       })

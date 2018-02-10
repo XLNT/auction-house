@@ -1,5 +1,5 @@
 export default {
-  address: "0xbab15d629b84e2c9575da294ab24b227e15fa02f",
+  address: "0xb848ef765e289762e9be66a38006ddc4d23aef24",
   abi: [
     {
       constant: true,

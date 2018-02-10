@@ -3,8 +3,9 @@ import { observer, inject } from "mobx-react";
 
 @inject("store")
 @observer
-export default class AccontLogin extends Component {
+export default class LoginRequired extends Component {
   render() {
+    return this.props.children;
     const { currentAccount, currentNetwork } = this.props.store;
     console.log(currentAccount, currentNetwork);
     if (!currentAccount) return <div>Please login to Metamask amigo</div>;

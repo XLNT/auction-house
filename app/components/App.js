@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Provider } from "mobx-react";
+
 import Nav from "./Nav";
 import Account from "./Account";
 import AuctionList from "./AuctionList";
 import Auction from "./Auction";
-import AccountLogin from "./AccountLogin";
+import LoginRequired from "./LoginRequired";
 
 export default class App extends Component {
   render() {
@@ -17,9 +18,9 @@ export default class App extends Component {
             <Route
               path="/account"
               component={props => (
-                <AccountLogin>
+                <LoginRequired>
                   <Account {...props} />
-                </AccountLogin>
+                </LoginRequired>
               )}
             />
             <Route path="/auction/:auctionId" component={Auction} />

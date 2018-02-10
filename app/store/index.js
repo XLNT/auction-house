@@ -1,22 +1,28 @@
 import { action, observable } from "mobx";
 import contract from "truffle-contract";
-import AuctionBaseContract from "../../build/contracts/AuctionBase.json";
-import { HillCore } from "../contracts";
+import { AuctionBase, HillCore } from "../contracts";
 
 export default class Store {
+  @observable currentBlock = "latest";
   @observable currentAccount = null;
   @observable currentNetwork = null;
-  @observable currentBlock = "latest";
+  @observable auctionBaseInstance = null;
   @observable hillCoreInstance = null;
 
   constructor(web3) {
     this.web3 = web3;
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
-    this.networkInterval = setInterval(() => this.setNetwork(), 500);
+    this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
+
     // Setup AuctionBase contract
-    this.AuctionBase = contract(AuctionBaseContract);
-    this.AuctionBase.setProvider(this.web3.currentProvider);
+    const AuctionBaseContract = contract({
+      abi: AuctionBase.abi
+    });
+    AuctionBaseContract.setProvider(this.web3.currentProvider);
+    AuctionBaseContract.at(AuctionBase.address).then(instance => {
+      this.auctionBaseInstance = instance;
+    });
 
     // Setup CryptoHills contract
     const HillCoreContract = contract({
@@ -26,7 +32,6 @@ export default class Store {
     HillCoreContract.at(HillCore.address).then(instance => {
       this.hillCoreInstance = instance;
     });
-    window.s = this;
   }
 
   setCurrentAccount() {
@@ -37,8 +42,8 @@ export default class Store {
     );
   }
 
-  setNetwork() {
-    web3.version.getNetwork((err, network) => {
+  setCurrentNetwork() {
+    web3.version.getNetwork((error, network) => {
       this.currentNetwork = network;
     })
   }
@@ -46,15 +51,9 @@ export default class Store {
   setCurrentBlock() {
     this.web3.eth.getBlock(
       "latest",
-      action((err, res) => {
-        if (res.number != this.currentBlock) {
-          console.log(
-            "Changing current block from",
-            this.currentBlock,
-            "to",
-            res.number
-          );
-          this.currentBlock = res.number;
+      action((error, result) => {
+        if (result.number != this.currentBlock) {
+          this.currentBlock = result.number;
         }
       })
     );
