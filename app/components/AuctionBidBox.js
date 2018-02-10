@@ -16,16 +16,19 @@ import {
   lighten
 } from "../styles";
 
+import { Line } from "./auction/auction";
+
 import CountDown from "./CountDown";
 
 const Container = styled("div")`
   border-radius: 8px;
   display: block;
   background-color: white;
+  box-shadow: 0 4px 8px 0 ${colors.darkGrey};
 `;
 
 const ContainerSection = styled("div")`
-  padding: ${basePadding}px ${basePadding / 2}px;
+  padding: ${basePadding / 2}px ${basePadding / 2}px;
   display: block;
 `;
 
@@ -140,20 +143,21 @@ export default class AuctionBidBox extends Component {
       <Centered>
         <Container>
           <ContainerSection>
+            <Spacer />
             <SectionTitle> Time Left</SectionTitle>
             <CountDown endDate={new Date().getTime() + 100000000} />
           </ContainerSection>
-
+          <Line />
           <ContainerSection>
             <SectionTitle>Highest Bid</SectionTitle>
             <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
           </ContainerSection>
-
+          <Line />
           <ContainerSection>
             <SectionTitle>Your Bid</SectionTitle>
             <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
           </ContainerSection>
-
+          <Line />
           <ContainerSection>
             <SectionTitle>Place Bid</SectionTitle>
 
@@ -176,7 +180,7 @@ export default class AuctionBidBox extends Component {
             <ActionButton onClick={() => this.submitBid()}>
               Place Bid
             </ActionButton>
-            {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
+            <Spacer />
           </ContainerSection>
         </Container>
       </Centered>

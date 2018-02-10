@@ -172,7 +172,6 @@ export default class Auction extends Component {
             <Heading>Auction #{id.toString()}</Heading>
             <SellerInformation>by {seller}</SellerInformation>
             <Spacer size={0.5} />
-
             <Description>
               NFT: {tokenId.toString()}@{nftAddress}
             </Description>

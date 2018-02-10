@@ -69,10 +69,16 @@ export const Description = styled("div")`
 
 export const Gallery = styled("div")`
   width: 100%;
-  height: 400px;
+  height: 350px;
   background-color: black;
   & img {
-    height: 400px;
+    height: 350px;
     width: 100%;
   }
+`;
+
+export const Line = styled("hr")`
+  width: 80%;
+  color: ${colors.grey};
+  margin: auto;
 `;
