@@ -32,6 +32,11 @@ Compile and migrate your local smart contracts.
 truffle migrate --reset
 ```
 
+Be sure to migrate the [auction-contracts](https://github.com/xlnt/auction-contracts)
+
+After migrating the auction contracts, copy the `address` for `AuctionBase.sol` into `app/contracts/AuctionBase.js`
+
+
 To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [auction-admin repo](https://github.com/xlnt/auction-admin)
 
-After migrating the registry contracts, copy the `address` for `HillCore.sol` into `app/ERC821Contracts/contracts/HillCore.js`
+After migrating the registry contracts, copy the `address` for `HillCore.sol` into `app/contracts/ERC821/HillCore.js`
