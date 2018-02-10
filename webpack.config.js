@@ -1,5 +1,6 @@
 const webpack = require("webpack");
 const path = require("path");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   context: __dirname,
@@ -25,7 +26,8 @@ module.exports = {
         RPC_HOST: JSON.stringify(process.env.RPC_HOST),
         RPC_PORT: JSON.stringify(process.env.RPC_PORT)
       }
-    })
+    }),
+    new CopyWebpackPlugin([{ from: "app/images/favicon.ico" }])
   ],
   module: {
     rules: [
