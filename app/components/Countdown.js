@@ -65,7 +65,13 @@ export default class Countdown extends Component {
   render() {
     return (
       <Timer>
-        {this.days} : {this.hours} : {this.minutes} : {this.seconds}
+        {this.completed || this.props.completed ? (
+          <span> 00 : 00 : 00 : 00 </span>
+        ) : (
+          <span>
+            {this.days} : {this.hours} : {this.minutes} : {this.seconds}
+          </span>
+        )}
       </Timer>
     );
   }

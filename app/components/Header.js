@@ -50,6 +50,13 @@ const Logo = styled("div")`
   padding: ${basePadding * 0.7}px 0;
 `;
 
+const WarningBar = styled("div")`
+  position: fixed;
+  top: 0;
+  border: 2px solid #ee0606;
+  width: 100%;
+`;
+
 @inject("store")
 @observer
 export default class Header extends Component {

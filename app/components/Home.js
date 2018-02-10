@@ -141,7 +141,10 @@ export default class Home extends Component {
           <LeftContainer width={40}>
             <Status>
               {this.statusText(auctionOfInterest.status)}{" "}
-              <StatusPulse color={this.statusColor(auctionOfInterest.status)} />
+              <StatusPulse
+                active={this.statusText(auctionOfInterest.status) == "Live"}
+                color={this.statusColor(auctionOfInterest.status)}
+              />
             </Status>
             <Spacer size={0.5} />
 

@@ -126,6 +126,30 @@ export default class Auction extends Component {
     this.hideOwnBidWarning = false;
   }
 
+  @action
+  async withdrawFunds() {
+    const { auctionBaseInstance } = this.props.store;
+    const adjustedBid = bigNumber.minus(this.currentAccountBid);
+    const params = {
+      from: this.props.store.currentAccount,
+      value: adjustedBid
+    };
+    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
+    this.hideOwnBidWarning = false;
+  }
+
+  @action
+  async withdrawArt() {
+    const { auctionBaseInstance } = this.props.store;
+    const adjustedBid = bigNumber.minus(this.currentAccountBid);
+    const params = {
+      from: this.props.store.currentAccount,
+      value: adjustedBid
+    };
+    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
+    this.hideOwnBidWarning = false;
+  }
+
   @computed
   get statusText() {
     const { status } = this.auction;
@@ -165,8 +189,13 @@ export default class Auction extends Component {
         <Container>
           <LeftContainer width={60}>
             <Status>
-              {this.statusText} <StatusPulse color={this.statusColor} />
+              {this.statusText}{" "}
+              <StatusPulse
+                active={this.statusText == "Live"}
+                color={this.statusColor}
+              />
             </Status>
+
             <Spacer size={0.5} />
 
             <Heading>Auction #{id.toString()}</Heading>
@@ -188,7 +217,10 @@ export default class Auction extends Component {
               highestBidder={highestBidder}
               bidIncrement={bidIncrement}
               currentAccountBid={this.currentAccountBid}
-              callback={bid => this.placeBid(bid)}
+              statusText={this.statusText}
+              bidCallback={bid => this.placeBid(bid)}
+              withdrawCallback={() => this.withdrawFunds()}
+              withdrawArtCallback={() => this.withdrawArt()}
             />
           </RightContainer>
         </Container>

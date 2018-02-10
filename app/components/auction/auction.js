@@ -40,12 +40,13 @@ export const Status = styled("div")`
 
 export const StatusPulse = styled("div")`
   background-color: ${props => (props.color ? props.color : colors.black)};
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   display: inline-block;
   margin-bottom 2px;
   border-radius: 100%;
-  animation: ${pulseBuilder()} 1.5s infinite ease-in-out;
+  animation:  ${props =>
+    props.active && `${pulseBuilder()} 1.5s infinite ease-in-out`};
 `;
 
 export const Heading = styled("span")`
