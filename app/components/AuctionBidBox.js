@@ -15,6 +15,8 @@ import {
   colors
 } from "../styles";
 
+import CountDown from "./CountDown";
+
 const Container = styled("div")`
   box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.1);
   border-radius: 2px;
@@ -119,6 +121,7 @@ export default class AuctionBidBox extends Component {
       <div>
         <Container>
           <ContainerBody>
+            <CountDown />
             <SectionTitle>Place Bid</SectionTitle>
             <Centered>
               <Button
