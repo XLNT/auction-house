@@ -1,4 +1,4 @@
-export const sansSerif = "system-ui, sans-serif";
+export const sansSerif = "Rubik, sans-serif";
 export const baseFontSize = "14px";
 export const largerFontSize = "16px";
 export const basePadding = 20;

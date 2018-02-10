@@ -54,10 +54,6 @@ export class Divider extends Component {
 export class FloatRight extends Component {
   render() {
     const { children } = this.props;
-    return (
-      <div style={{ float: "right" }}>
-        {children}
-      </div>
-    );
+    return <div style={{ float: "right" }}>{children}</div>;
   }
 }

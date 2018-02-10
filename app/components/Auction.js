@@ -18,13 +18,33 @@ import {
 const AuctionGallery = styled("div")`
   width: 100%;
   height: 400px;
-  background-color: ${colors.yellow};
+  background-color: ${colors.green};
 `;
 
 const AuctionHeading = styled("span")`
   font-size: ${fontSizes.huge};
   font-weight: 600;
   display: inline-block;
+`;
+
+const AuctionContainer = styled("div")`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: auto;
+`;
+
+const AuctionDataContainer = styled("div")`
+  width: 70%;
+  background-color: ${colors.red};
+  float: left;
+`;
+
+const AuctionBidContainer = styled("div")`
+  width: 30%;
+  background-color: ${colors.blue};
+  float: right;
 `;
 
 @inject("store")
@@ -114,40 +134,20 @@ export default class Auction extends Component {
     );
   }
 
-  @action
-  async placeBid(bigNumber) {
-    const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = bigNumber.minus(this.currentAccountBid);
-    const params = {
-      from: this.props.store.currentAccount,
-      value: adjustedBid
-    };
-    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
-    this.hideOwnBidWarning = false;
-  }
-
-  @action
-  hideBidWarning() {
-    this.hideOwnBidWarning = true;
+  @computed
+  get auctionStatusText() {
+    const { status } = this.auction;
+    if (status.equals(0)) return "Live";
+    else if (status.equals(1)) return "Cancelled";
+    else return "Completed";
   }
 
   @computed
-  get nextMinBid() {
-    if (!this.auction) return false;
-    const { highestBid, bidIncrement } = this.auction;
-    return highestBid.plus(bidIncrement).minus(this.currentAccountBid);
-  }
-
-  @computed
-  get highestEthBid() {
-    return this.props.store.web3.fromWei(this.auction.highestBid, "ether");
-  }
-
-  @computed
-  get showBidBox() {
-    const ownHighestBid =
-      this.auction.highestBidder == this.props.store.currentAccount;
-    return !ownHighestBid || this.hideOwnBidWarning;
+  get auctionStatusColor() {
+    const { status } = this.auction;
+    if (status.equals(0)) return colors.green;
+    else if (status.equals(1)) return colors.yellow;
+    else return colors.blue;
   }
 
   render() {
@@ -172,48 +172,32 @@ export default class Auction extends Component {
       <Wrapper>
         <Spacer />
         <div>
-          <AuctionHeading>Auction {id.toString()}</AuctionHeading>{" "}
-          {isActive && <Badge color={colors.green}>LIVE</Badge>}
+          <AuctionHeading>Auction #{id.toString()}</AuctionHeading>{" "}
+          <Badge color={this.auctionStatusColor}>
+            {this.auctionStatusText}
+          </Badge>
         </div>
         <Spacer />
-        <AuctionGallery />
-        <Spacer />
-        <div>
-          <b>Metadata</b>
-          <Spacer size={0.5} />
-          <div>
-            NFT: {tokenId.toString()}@{nftAddress}
-          </div>
-          <div>Seller: {seller}</div>
-        </div>
-        <Spacer />
-        <div>
-          <b>Current highest bid:</b>{" "}
-          {highestBid > 0 ? (
-            <span>
-              {this.highestEthBid.toString()} ETH from{" "}
-              {highestBidder == this.props.store.currentAccount
-                ? "you"
-                : highestBidder}
-            </span>
-          ) : (
-            <span>No bids yet</span>
-          )}
-        </div>
-        <Spacer />
-        {this.showBidBox ? (
-          <AuctionBidBox
-            highestBid={highestBid}
-            bidIncrement={bidIncrement}
-            callback={bid => this.placeBid(bid)}
-          />
-        ) : (
-          <span>
-            <b>🎉 You're the highest bidder!</b>{" "}
-            <a onClick={() => this.hideBidWarning()}>Bid higher?</a>
-          </span>
-        )}
-        <Spacer size={2} />
+        <AuctionContainer>
+          <AuctionDataContainer>
+            <AuctionGallery />
+            <div>
+              <b>Metadata</b>
+              <Spacer size={0.5} />
+              <div>
+                NFT: {tokenId.toString()}@{nftAddress}
+              </div>
+              <div>Seller: {seller}</div>
+            </div>
+          </AuctionDataContainer>
+          <AuctionBidContainer>
+            <AuctionBidBox
+              highestBid={highestBid}
+              highestBidder={highestBidder}
+              bidIncrement={bidIncrement}
+            />
+          </AuctionBidContainer>
+        </AuctionContainer>
       </Wrapper>
     );
   }

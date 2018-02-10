@@ -9,7 +9,6 @@
   "author": "Paul Fletcher-Hill <pfletcherhill@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "bidi-mobx": "^0.20.0",
     "dotenv": "^4.0.0",
     "emotion": "^9.0.0",
     "express": "^4.16.2",

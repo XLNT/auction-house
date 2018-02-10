@@ -18,6 +18,30 @@ export default class AuctionBidBox extends Component {
     this.props.callback(this.newBid);
   }
 
+  @action
+  hideBidWarning() {
+    this.hideOwnBidWarning = true;
+  }
+
+  @computed
+  get showBidBox() {
+    const ownHighestBid =
+      this.auction.highestBidder == this.props.store.currentAccount;
+    return !ownHighestBid || this.hideOwnBidWarning;
+  }
+
+  @action
+  async placeBid(bigNumber) {
+    const { auctionBaseInstance } = this.props.store;
+    const adjustedBid = bigNumber.minus(this.currentAccountBid);
+    const params = {
+      from: this.props.store.currentAccount,
+      value: adjustedBid
+    };
+    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
+    this.hideOwnBidWarning = false;
+  }
+
   bidIsValid(newBid) {
     return newBid.gte(this.minBid);
   }
@@ -47,6 +71,24 @@ export default class AuctionBidBox extends Component {
     return this.props.store.web3.fromWei(this.newBid, "ether");
   }
 
+  // {this.showBidBox ? (
+  //   <AuctionBidBox
+  //     highestBid={highestBid}
+  //     highestBidder={highestBidder}
+  //     bidIncrement={bidIncrement}
+  //   />
+  // ) : (
+  //   <span>
+  //     <b>🎉 You're the highest bidder!</b> <Spacer />
+  //     <a
+  //       style={{ color: "#111" }}
+  //       onClick={() => this.hideBidWarning()}
+  //     >
+  //       Bid higher?
+  //     </a>
+  //   </span>
+  // )}
+
   render() {
     return (
       <div>
@@ -72,6 +114,6 @@ export default class AuctionBidBox extends Component {
 
 AuctionBidBox.propTypes = {
   highestBid: PropTypes.object.isRequired,
-  bidIncrement: PropTypes.object.isRequired,
-  callback: PropTypes.func.isRequired
+  highestBidder: PropTypes.object.isRequired,
+  bidIncrement: PropTypes.object.isRequired
 };
