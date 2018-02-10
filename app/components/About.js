@@ -13,7 +13,8 @@ const Heading = styled("div")`
 `;
 
 const Description = styled("div")`
-  font-size: 16px;
+  font-size: 28px;
+  font-weight: 200;
   color: white;
   width: 100%;
 `;
@@ -26,10 +27,12 @@ export default class About extends Component {
   @observable fadeBuffer = false;
   codeletters = "&#*+%?£@§$";
   messages = [
-    "This is a message, which can be long and all.",
-    "This could be another message.",
-    "Also short ones work!",
-    "Cool."
+    "A cryptocollectible wallet and showcase",
+    "A cryptocollectible auction marketplace",
+    "A community for cryptocollectibles",
+    "A social, p2p trading layer for cryptocollectibles",
+    "All built on the open standards you know and love",
+    "A series of partnerships and experiments to answer that question of “what’s next”"
   ];
 
   componentWillMount() {
@@ -61,18 +64,18 @@ export default class About extends Component {
     }
 
     let cycles = false;
-    this.description = "";
+    this.message = "";
 
     for (let i = 0; i < this.fadeBuffer.length; i++) {
       let fader = this.fadeBuffer[i];
       if (fader.c > 0) {
         cycles = true;
         fader.c--;
-        this.description += this.codeletters.charAt(
+        this.message += this.codeletters.charAt(
           Math.floor(Math.random() * this.codeletters.length)
         );
       } else {
-        this.description += fader.l;
+        this.message += fader.l;
       }
     }
 
@@ -108,14 +111,13 @@ export default class About extends Component {
   }
 
   render() {
-    console.log(this.message);
-
     return (
       <Wrapper>
         <Centered>
-          <Spacer size={4} />
+          <Spacer size={5} />
           <Heading>XLNT 🎉 is</Heading>
-          <Description>{this.description}</Description>
+          <Spacer size={2} />
+          <Description>{this.message}</Description>
         </Centered>
       </Wrapper>
     );
