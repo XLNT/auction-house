@@ -23,7 +23,7 @@ const Container = styled("div")`
   display: block;
 `;
 
-const ContainerBody = styled("div")`
+const ContainerSection = styled("div")`
   border-bottom: 1px solid ${colors.grey}
   padding: ${basePadding}px;
   display: block;
@@ -120,8 +120,8 @@ export default class AuctionBidBox extends Component {
     return (
       <div>
         <Container>
-          <ContainerBody>
-            <CountDown />
+          <ContainerSection>
+            <CountDown endDate={new Date().getTime() + 100000000} />
             <SectionTitle>Place Bid</SectionTitle>
             <Centered>
               <Button
@@ -140,7 +140,7 @@ export default class AuctionBidBox extends Component {
               <Button onClick={() => this.placeBid()}>Place Bid!!</Button>
               {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
             </Centered>
-          </ContainerBody>
+          </ContainerSection>
         </Container>
       </div>
     );

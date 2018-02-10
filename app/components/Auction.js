@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
-import styled from "react-emotion";
+import styled, { keyframes } from "react-emotion";
 import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
@@ -14,20 +14,20 @@ import {
   fontSizes,
   darken
 } from "../styles";
+import test from "../images/test.png";
 
-const AuctionGallery = styled("div")`
-  width: 100%;
-  height: 400px;
-  background-color: ${colors.green};
-`;
+function pulseBuilder(degree) {
+  const pulse = keyframes`
+    0% { -webkit-transform: scale(0) }
+    100% {
+      -webkit-transform: scale(1.0);
+      opacity: 0;
+    }
+  `;
+  return pulse;
+}
 
-const AuctionHeading = styled("span")`
-  font-size: ${fontSizes.huge};
-  font-weight: 600;
-  display: inline-block;
-`;
-
-const AuctionContainer = styled("div")`
+const Container = styled("div")`
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -35,23 +35,69 @@ const AuctionContainer = styled("div")`
   margin: auto;
 `;
 
-const AuctionDataContainer = styled("div")`
+const MetadataContainer = styled("div")`
   width: 65%;
-  background-color: ${colors.red};
   float: left;
 `;
 
-const AuctionBidContainer = styled("div")`
+const BidContainer = styled("div")`
   width: 30%;
   float: right;
   padding-left: ${basePadding}px;
   padding-right: ${basePadding}px;
+  background-color: ${colors.yellow};
+`;
+
+const Status = styled("div")`
+  font-size: 15px;
+  font-weight: 400;
+  color: ${colors.grey};
+  text-transform: uppercase;
+  display: inline-block;
+`;
+
+const StatusPulse = styled("div")`
+  background-color: ${colors.green};
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  margin-bottom 2px;
+  border-radius: 100%;
+  animation: ${pulseBuilder(10)} 1.5s infinite ease-in-out;
+`;
+
+const Heading = styled("span")`
+  font-size: 40px;
+  font-weight: 600;
+  display: inline-block;
+  color: white;
+`;
+
+const SellerInformation = styled("div")`
+  font-weight: 100;
+  font-size: 14px;
+  color: white;
+`;
+
+const Description = styled("div")`
+  font-size: 18px;
+  font-weight: 300;
+  color: white;
+`;
+
+const Gallery = styled("div")`
+  width: 100%;
+  height: 400px;
+  background-color: ${colors.green};
+  & img {
+    height: 400px;
+  }
 `;
 
 @inject("store")
 @observer
 export default class Auction extends Component {
-  @observable auction;
+  @observable auction = undefined;
   @observable loadingAuction = true;
   @observable currentAccountBid = new BigNumber(0);
   @observable hideOwnBidWarning = false;
@@ -136,7 +182,7 @@ export default class Auction extends Component {
   }
 
   @computed
-  get auctionStatusText() {
+  get StatusText() {
     const { status } = this.auction;
     if (status.equals(0)) return "Live";
     else if (status.equals(1)) return "Cancelled";
@@ -144,7 +190,7 @@ export default class Auction extends Component {
   }
 
   @computed
-  get auctionStatusColor() {
+  get StatusColor() {
     const { status } = this.auction;
     if (status.equals(0)) return colors.green;
     else if (status.equals(1)) return colors.yellow;
@@ -152,7 +198,8 @@ export default class Auction extends Component {
   }
 
   render() {
-    if (this.loadingAuction) return <div>Loading...</div>;
+    if (this.loadingAuction)
+      return <div style={{ color: colors.blue }}>Loading...</div>;
     const {
       id,
       nftAddress,
@@ -169,35 +216,36 @@ export default class Auction extends Component {
 
     return (
       <Wrapper>
-        <Spacer />
-        <div>
-          <AuctionHeading>Auction #{id.toString()}</AuctionHeading>{" "}
-          <Badge color={this.auctionStatusColor}>
-            {this.auctionStatusText}
-          </Badge>
-        </div>
-        <Spacer />
-        <AuctionContainer>
-          <AuctionDataContainer>
-            <AuctionGallery />
-            <div>
-              <b>Metadata</b>
-              <Spacer size={0.5} />
-              <div>
-                NFT: {tokenId.toString()}@{nftAddress}
-              </div>
-              <div>Seller: {seller}</div>
-            </div>
-          </AuctionDataContainer>
+        <Spacer size={3} />
+        <Container>
+          <MetadataContainer>
+            <Status>
+              <StatusPulse color={this.StatusColor} /> {this.StatusText}
+            </Status>
+            <Spacer size={0.5} />
 
-          <AuctionBidContainer>
+            <Heading>Auction #{id.toString()}</Heading>
+            <SellerInformation>by {seller}</SellerInformation>
+            <Spacer size={0.5} />
+
+            <Description>
+              NFT: {tokenId.toString()}@{nftAddress}
+            </Description>
+            <Spacer />
+
+            <Gallery>
+              <img src={test} />
+            </Gallery>
+          </MetadataContainer>
+
+          <BidContainer>
             <AuctionBidBox
               highestBid={highestBid}
               highestBidder={highestBidder}
               bidIncrement={bidIncrement}
             />
-          </AuctionBidContainer>
-        </AuctionContainer>
+          </BidContainer>
+        </Container>
       </Wrapper>
     );
   }

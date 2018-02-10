@@ -1,14 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { action, observable } from "mobx";
-
-const zeroPad = (value, length = 2) => {
-  if (length === 0) return value;
-  const strValue = String(value);
-  return strValue.length >= length
-    ? strValue
-    : ("0".repeat(length) + strValue).slice(length * -1);
-};
+import { action, observable, computed } from "mobx";
 
 @inject("store")
 @observer
@@ -19,32 +11,44 @@ export default class Countdown extends Component {
   @observable seconds = undefined;
   @observable completed = false;
 
-  componentDidMount() {
+  componentWillMount() {
     this.tick();
-    this.interval = setInterval(this.tick, 1000);
+    this.interval = setInterval(this.tick.bind(this), 1000);
   }
 
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
+  zeroPad(value, length = 2) {
+    if (length === 0) return value;
+    const strValue = String(value);
+    return strValue.length >= length
+      ? strValue
+      : ("0".repeat(length) + strValue).slice(length * -1);
+  }
+
+  @computed
+  get getEndDate() {
+    return typeof this.props.endDate === "string"
+      ? new Date(this.props.endDate)
+      : this.props.endDate;
+  }
+
   @action
   tick() {
-    console.log("HEY");
-    let now = new Date().getTime();
-    let endDate = new Date().getTime() + 100000;
-    // typeof this.props.endDate === "string"
-    //   ? new Date(this.props.endDate)
-    //   : this.props.endDate;
-    let difference = endDate - now;
-    this.days = zeroPad(Math.floor(difference / (1000 * 60 * 60 * 24)));
-    this.hours = zeroPad(
+    const now = new Date().getTime();
+    const endDate = this.getEndDate;
+    const difference = endDate - now;
+
+    this.days = this.zeroPad(Math.floor(difference / (1000 * 60 * 60 * 24)));
+    this.hours = this.zeroPad(
       Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
     );
-    this.minutes = zeroPad(
+    this.minutes = this.zeroPad(
       Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
     );
-    this.seconds = zeroPad(Math.floor((difference % (1000 * 60)) / 1000));
+    this.seconds = this.zeroPad(Math.floor((difference % (1000 * 60)) / 1000));
 
     if (difference < 0) {
       clearInterval(this.interval);
@@ -53,6 +57,10 @@ export default class Countdown extends Component {
   }
 
   render() {
-    return <div>{this.seconds}</div>;
+    return (
+      <div>
+        {this.minutes}, {this.seconds}
+      </div>
+    );
   }
 }

@@ -19,19 +19,23 @@ const HeaderContainer = styled("div")`
   height: ${headerHeight}px;
   width: 100%;
   line-height: ${headerHeight - 2 * basePadding}px;
-  background-color: ${colors.grey};
+  background-color: black;
+  padding-top: ${basePadding}px;
 `;
 
 const HeaderText = styled("span")`
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 300;
   display: inline-block;
   padding: ${basePadding}px 0;
   margin: 0 0 0 ${basePadding}px;
   & a {
-    color: ${colors.black};
+    color: white;
   }
   & a:hover {
     text-decoration: none;
-    color: black;
+    color: ${colors.grey};
   }
 `;
 
@@ -41,9 +45,9 @@ const Logo = styled("div")`
   height: ${headerHeight - 1}px;
   display: inline-block;
   & img {
-    height: ${headerHeight - basePadding * 1 - 1}px;
+    height: ${headerHeight - basePadding * 1.4 - 1}px;
   }
-  padding: ${basePadding * 0.5}px 0;
+  padding: ${basePadding * 0.7}px 0;
 `;
 
 @inject("store")

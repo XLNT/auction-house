@@ -2,10 +2,12 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Provider } from "mobx-react";
 
-import Header from "./Header";
 import Account from "./Account";
+import Header from "./Header";
 import AuctionList from "./AuctionList";
 import Auction from "./Auction";
+import About from "./About";
+import Invite from "./Invite";
 import LoginRequired from "./LoginRequired";
 
 export default class App extends Component {
@@ -24,6 +26,8 @@ export default class App extends Component {
               )}
             />
             <Route path="/auction/:auctionId" component={Auction} />
+            <Route exact path="/about" component={About} />
+            <Route exact path="/invite" component={Invite} />
             <Route exact path="/" component={AuctionList} />
           </div>
         </Router>
