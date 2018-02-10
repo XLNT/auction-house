@@ -57,3 +57,10 @@ export class FloatRight extends Component {
     return <div style={{ float: "right" }}>{children}</div>;
   }
 }
+
+export class Centered extends Component {
+  render() {
+    const { children } = this.props;
+    return <div style={{ textAlign: "center" }}>{children}</div>;
+  }
+}

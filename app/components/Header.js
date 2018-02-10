@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
+import { observable } from "mobx";
 import { Link } from "react-router-dom";
 import {
   Wrapper,
@@ -48,7 +49,7 @@ const Logo = styled("div")`
 @inject("store")
 @observer
 export default class Header extends Component {
-  get currentAccount() {
+  currentAccount() {
     return this.props.store.currentAccount;
   }
 
@@ -69,10 +70,6 @@ export default class Header extends Component {
 
             <HeaderText>
               <Link to="/about">About</Link>
-            </HeaderText>
-
-            <HeaderText>
-              <Link to="/faqs">FAQs</Link>
             </HeaderText>
           </FloatRight>
         </Wrapper>

@@ -2,8 +2,37 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { inject, observer } from "mobx-react";
 import { observable, action, runInAction, computed } from "mobx";
+import styled from "react-emotion";
 import BigNumber from "bignumber.js";
-import { Button, Input } from "../styles";
+
+import {
+  Button,
+  Input,
+  Spacer,
+  Divider,
+  Centered,
+  basePadding,
+  colors
+} from "../styles";
+
+const Container = styled("div")`
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  display: block;
+`;
+
+const ContainerBody = styled("div")`
+  border-bottom: 1px solid ${colors.grey}
+  padding: ${basePadding}px;
+  display: block;
+  &:last-child {
+    border-bottom: 0 none;
+  }
+`;
+
+const SectionTitle = styled("div")`
+  text-transform: uppercase;
+`;
 
 @inject("store")
 @observer
@@ -14,26 +43,14 @@ export default class AuctionBidBox extends Component {
     runInAction(() => (this.newBid = this.minBid));
   }
 
-  submitBid() {
-    this.props.callback(this.newBid);
+  bidIsValid(newBid) {
+    return newBid.gte(this.minBid);
   }
 
   @action
-  hideBidWarning() {
-    this.hideOwnBidWarning = true;
-  }
-
-  @computed
-  get showBidBox() {
-    const ownHighestBid =
-      this.auction.highestBidder == this.props.store.currentAccount;
-    return !ownHighestBid || this.hideOwnBidWarning;
-  }
-
-  @action
-  async placeBid(bigNumber) {
+  async placeBid() {
     const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = bigNumber.minus(this.currentAccountBid);
+    const adjustedBid = this.newBid.minus(this.currentAccountBid);
     const params = {
       from: this.props.store.currentAccount,
       value: adjustedBid
@@ -42,13 +59,21 @@ export default class AuctionBidBox extends Component {
     this.hideOwnBidWarning = false;
   }
 
-  bidIsValid(newBid) {
-    return newBid.gte(this.minBid);
+  @action
+  hideBidWarning() {
+    this.hideOwnBidWarning = true;
   }
 
   @action
   updateBid(newBid) {
     this.newBid = newBid;
+  }
+
+  @computed
+  get showBidBox() {
+    const ownHighestBid =
+      this.auction.highestBidder == this.props.store.currentAccount;
+    return !ownHighestBid || this.hideOwnBidWarning;
   }
 
   @computed
@@ -92,21 +117,28 @@ export default class AuctionBidBox extends Component {
   render() {
     return (
       <div>
-        <span>{this.newEthBid.toNumber()} ETH</span>{" "}
-        <Button
-          disabled={!this.bidIsValid(this.downBid)}
-          onClick={() => this.updateBid(this.downBid)}
-        >
-          -
-        </Button>{" "}
-        <Button
-          disabled={!this.bidIsValid(this.upBid)}
-          onClick={() => this.updateBid(this.upBid)}
-        >
-          +
-        </Button>{" "}
-        <Button onClick={() => this.submitBid()}>Place Bid!!</Button>
-        {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
+        <Container>
+          <ContainerBody>
+            <SectionTitle>Place Bid</SectionTitle>
+            <Centered>
+              <Button
+                disabled={!this.bidIsValid(this.downBid)}
+                onClick={() => this.updateBid(this.downBid)}
+              >
+                -
+              </Button>{" "}
+              <span>{this.newEthBid.toNumber()} ETH</span>{" "}
+              <Button
+                disabled={!this.bidIsValid(this.upBid)}
+                onClick={() => this.updateBid(this.upBid)}
+              >
+                +
+              </Button>{" "}
+              <Button onClick={() => this.placeBid()}>Place Bid!!</Button>
+              {this.showErrors && <div>Error: {this.errors.join(", ")}</div>}
+            </Centered>
+          </ContainerBody>
+        </Container>
       </div>
     );
   }
@@ -114,6 +146,6 @@ export default class AuctionBidBox extends Component {
 
 AuctionBidBox.propTypes = {
   highestBid: PropTypes.object.isRequired,
-  highestBidder: PropTypes.object.isRequired,
+  highestBidder: PropTypes.string.isRequired,
   bidIncrement: PropTypes.object.isRequired
 };

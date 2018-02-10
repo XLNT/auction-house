@@ -36,15 +36,16 @@ const AuctionContainer = styled("div")`
 `;
 
 const AuctionDataContainer = styled("div")`
-  width: 70%;
+  width: 65%;
   background-color: ${colors.red};
   float: left;
 `;
 
 const AuctionBidContainer = styled("div")`
   width: 30%;
-  background-color: ${colors.blue};
   float: right;
+  padding-left: ${basePadding}px;
+  padding-right: ${basePadding}px;
 `;
 
 @inject("store")
@@ -166,8 +167,6 @@ export default class Auction extends Component {
       highestBidder
     } = this.auction;
 
-    const isActive = status.equals(0);
-
     return (
       <Wrapper>
         <Spacer />
@@ -190,6 +189,7 @@ export default class Auction extends Component {
               <div>Seller: {seller}</div>
             </div>
           </AuctionDataContainer>
+
           <AuctionBidContainer>
             <AuctionBidBox
               highestBid={highestBid}
