@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { action, observable, observe, autorun, runInAction } from "mobx";
+import { action, autorun, observable, observe, runInAction, when } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import BigNumber from "bignumber.js";
@@ -12,31 +12,64 @@ export default class AuctionList extends Component {
   @observable auctionsLength = new BigNumber(0);
 
   async componentDidMount() {
-    this.auctionBase = await this.props.store.AuctionBase.deployed();
-    autorun(() => this.getAuctionsLength());
-    const watcher = observe(this, "auctionsLength", change => {
+    const { auctionId } = this.props.match.params;
+    this.auctionBaseWatcher = when(
+      () => this.props.store.auctionBaseInstance,
+      () => {
+        this.getAuctionsLength();
+        this.blockWatcher = observe(
+          this.props.store,
+          "currentBlock",
+          change => {
+            this.getAuctionsLength();
+          }
+        );
+      }
+    );
+
+    this.auctionsLengthWatcher = observe(this, "auctionsLength", change => {
       this.getAuctions();
     });
   }
 
+  componentWillUnmount() {
+    if (this.auctionBaseWatcher) {
+      this.auctionBaseWatcher();
+    }
+
+    if (this.auctionsLengthWatcher) {
+      this.auctionsLengthWatcher();
+    }
+
+    if (this.blockWatcher) {
+      this.blockWatcher();
+    }
+  }
+
   async getAuctionsLength() {
-    this.auctionsLength = await this.auctionBase.getAuctionsCount(
+    const { auctionBaseInstance } = this.props.store;
+    this.auctionsLength = await auctionBaseInstance.getAuctionsCount(
       {},
       this.props.store.currentBlock
     );
   }
 
   async getAuctions() {
-    const { currentBlock, currentAccount } = this.props.store;
+    const {
+      currentBlock,
+      currentAccount,
+      auctionBaseInstance
+    } = this.props.store;
     if (this.auctionsLength == 0) return false;
     const promises = [];
     for (let i = 0; i < this.auctionsLength; i++) {
-      promises.push(this.importAuction(i, currentBlock));
+      promises.push(this.importAuction(i));
     }
     this.auctions = await Promise.all(promises);
   }
 
-  async importAuction(_id, currentBlock) {
+  async importAuction(_id) {
+    const { currentBlock, auctionBaseInstance } = this.props.store;
     const [
       id,
       nftAddress,
@@ -49,7 +82,7 @@ export default class AuctionList extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await this.auctionBase.getAuction(_id, currentBlock);
+    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
     return {
       id,
       nftAddress,

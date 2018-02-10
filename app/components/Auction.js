@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { observable, observe, action, autorun, computed } from "mobx";
+import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
 import styled from "react-emotion";
 import AuctionBidBox from "./AuctionBidBox";
@@ -46,8 +46,7 @@ export default class Auction extends Component {
           change => {
             this.getAuction(auctionId);
             this.getCurrentAccountBid(auctionId);
-          },
-          true // invoke immediately
+          }
         );
       }
     );
@@ -66,7 +65,7 @@ export default class Auction extends Component {
   @action
   async getAuction(_id) {
     this.loadingAuction = true;
-    const { currentBlock } = this.props.store;
+    const { auctionBaseInstance, currentBlock } = this.props.store;
     const [
       id,
       nftAddress,
@@ -79,7 +78,7 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await this.auctionBase.getAuction(_id, {}, currentBlock);
+    ] = await auctionBaseInstance.getAuction(_id, {}, currentBlock);
     this.auction = {
       id,
       nftAddress,
@@ -98,12 +97,16 @@ export default class Auction extends Component {
 
   @action
   async getCurrentAccountBid(_id) {
-    const { currentAccount, currentBlock } = this.props.store;
+    const {
+      auctionBaseInstance,
+      currentAccount,
+      currentBlock
+    } = this.props.store;
     if (!currentAccount) {
       this.currentAccountBid = new BigNumber(0);
       return false;
     }
-    this.currentAccountBid = await this.auctionBase.getBid(
+    this.currentAccountBid = await auctionBaseInstance.getBid(
       _id,
       currentAccount,
       {},
@@ -113,12 +116,13 @@ export default class Auction extends Component {
 
   @action
   async placeBid(bigNumber) {
+    const { auctionBaseInstance } = this.props.store;
     const adjustedBid = bigNumber.minus(this.currentAccountBid);
     const params = {
       from: this.props.store.currentAccount,
       value: adjustedBid
     };
-    const receipt = await this.auctionBase.bid(this.auction.id, params);
+    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
     this.hideOwnBidWarning = false;
   }
 

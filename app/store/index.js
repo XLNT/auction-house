@@ -5,6 +5,7 @@ import { AuctionBase, HillCore } from "../contracts";
 export default class Store {
   @observable currentAccount = null;
   @observable currentBlock = "latest";
+  @observable auctionBaseInstance = null;
   @observable hillCoreInstance = null;
 
   constructor(web3) {
