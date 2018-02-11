@@ -45,7 +45,7 @@ export default class Store {
   setCurrentNetwork() {
     web3.version.getNetwork((error, network) => {
       this.currentNetwork = network;
-    })
+    });
   }
 
   setCurrentBlock() {

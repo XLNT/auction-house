@@ -24,7 +24,8 @@ module.exports = {
       "process.env": {
         PORT: JSON.stringify(process.env.PORT),
         RPC_HOST: JSON.stringify(process.env.RPC_HOST),
-        RPC_PORT: JSON.stringify(process.env.RPC_PORT)
+        RPC_PORT: JSON.stringify(process.env.RPC_PORT),
+        STAGE: JSON.stringify(process.env.STAGE)
       }
     }),
     new CopyWebpackPlugin([{ from: "app/images/favicon.ico" }])

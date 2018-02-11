@@ -24,6 +24,7 @@ Add an `.env` file depending on which port ganache is running on and which port 
 PORT=5000
 RPC_HOST="127.0.0.1"
 RPC_PORT=8545
+STAGE="development"
 ```
 
 Compile and migrate your local smart contracts.
@@ -35,7 +36,6 @@ truffle migrate --reset
 Be sure to migrate the [auction-contracts](https://github.com/xlnt/auction-contracts)
 
 After migrating the auction contracts, copy the `address` for `AuctionBase.sol` into `app/contracts/AuctionBase.js`
-
 
 To add an ERC821 CryptoHill to account index 1 on ganache follow the instructions at the [auction-admin repo](https://github.com/xlnt/auction-admin)
 

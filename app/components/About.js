@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
 import { observable, action, runInAction, computed } from "mobx";
-import styled, { keyframes } from "react-emotion";
+import styled from "react-emotion";
 
 import { Wrapper, Spacer, Centered, colors } from "../styles";
 

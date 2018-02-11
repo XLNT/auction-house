@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { observable } from "mobx";
+import { observable, computed } from "mobx";
 import { Link } from "react-router-dom";
+import styled from "react-emotion";
 import {
   Wrapper,
   Spacer,
@@ -11,7 +12,6 @@ import {
   colors,
   FloatRight
 } from "../styles";
-import styled from "react-emotion";
 import logo from "../images/logo.png";
 
 const HeaderContainer = styled("div")`
@@ -50,20 +50,9 @@ const Logo = styled("div")`
   padding: ${basePadding * 0.7}px 0;
 `;
 
-const WarningBar = styled("div")`
-  position: fixed;
-  top: 0;
-  border: 2px solid #ee0606;
-  width: 100%;
-`;
-
 @inject("store")
 @observer
 export default class Header extends Component {
-  currentAccount() {
-    return this.props.store.currentAccount;
-  }
-
   render() {
     return (
       <HeaderContainer>
