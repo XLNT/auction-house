@@ -156,6 +156,7 @@ export default class AuctionBidBox extends Component {
 
   @computed
   get userHasParticipated() {
+    console.log(this.currentBid.toNumber());
     return this.currentBid.toNumber() != 0;
   }
 
@@ -192,16 +193,19 @@ export default class AuctionBidBox extends Component {
                 <Line />
               </span>
             )}
-          {this.userHasParticipated &&
-            this.statusText !== "Cancelled" && (
-              <span>
-                <ContainerSection>
-                  <SectionTitle>Your Bid</SectionTitle>
+          {this.statusText !== "Cancelled" && (
+            <span>
+              <ContainerSection>
+                <SectionTitle>Your Bid</SectionTitle>
+                {this.userHasParticipated ? (
                   <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
-                </ContainerSection>
-                <Line />
-              </span>
-            )}
+                ) : (
+                  <Explanation>You haven't placed a bid yet.</Explanation>
+                )}
+              </ContainerSection>
+              <Line />
+            </span>
+          )}
           {this.props.statusText === "Live" && (
             <ContainerSection>
               <SectionTitle>Place Bid</SectionTitle>
@@ -223,9 +227,7 @@ export default class AuctionBidBox extends Component {
               </SectionData>
               <Spacer />
               <ActionButton onClick={() => this.submitBid()}>
-                {this.isUsersFirstBidInAuction
-                  ? "Place first bid"
-                  : "Another one"}
+                {this.userHasParticipated ? "Another one" : "Place first bid"}
               </ActionButton>
               <Spacer />
             </ContainerSection>
@@ -291,6 +293,5 @@ AuctionBidBox.propTypes = {
   bidIncrement: PropTypes.object.isRequired,
   bidCallback: PropTypes.func.isRequired,
   withdrawCallback: PropTypes.func.isRequired,
-
   statusText: PropTypes.string.isRequired
 };
