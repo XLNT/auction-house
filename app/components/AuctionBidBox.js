@@ -13,7 +13,8 @@ import {
   Centered,
   basePadding,
   colors,
-  lighten
+  lighten,
+  transform
 } from "../styles";
 
 import { Line } from "./auction/auction";
@@ -24,7 +25,7 @@ const Container = styled("div")`
   border-radius: 8px;
   display: block;
   background-color: white;
-  box-shadow: 0 4px 8px 0 ${colors.darkGrey};
+  box-shadow: 0 3px 8px 0 ${colors.darkGrey};
 `;
 
 const ContainerSection = styled("div")`
@@ -109,12 +110,8 @@ export default class AuctionBidBox extends Component {
     this.props.bidCallback(this.newBid);
   }
 
-  withdrawFunds() {
+  withdrawBalance() {
     this.props.withdrawCallback();
-  }
-
-  withdrawArt() {
-    this.props.withdrawArtCallback();
   }
 
   @action
@@ -158,7 +155,7 @@ export default class AuctionBidBox extends Component {
   }
 
   @computed
-  get userHasBidded() {
+  get userHasParticipated() {
     return this.currentBid.toNumber() != 0;
   }
 
@@ -195,7 +192,7 @@ export default class AuctionBidBox extends Component {
                 <Line />
               </span>
             )}
-          {this.userHasBidded &&
+          {this.userHasParticipated &&
             this.statusText !== "Cancelled" && (
               <span>
                 <ContainerSection>
@@ -237,14 +234,14 @@ export default class AuctionBidBox extends Component {
             <ContainerSection>
               <SectionTitle>Withdraw Funds</SectionTitle>
 
-              {this.userHasBidded && (
+              {this.userHasParticipated && (
                 <span>
                   <Explanation>
                     Unfortunately, this auction has been cancelled. Please
                     withdraw your funds.
                   </Explanation>
 
-                  <ActionButton onClick={() => this.withdrawFunds()}>
+                  <ActionButton onClick={() => this.withdrawBalance()}>
                     Withdraw
                   </ActionButton>
                   <Spacer />
@@ -261,7 +258,7 @@ export default class AuctionBidBox extends Component {
                     Congratulations, you won the auction!
                   </Explanation>
 
-                  <ActionButton onClick={() => this.withdrawArt()}>
+                  <ActionButton onClick={() => this.withdrawBalance()}>
                     Claim Your Artwork
                   </ActionButton>
                   <Spacer />
@@ -274,7 +271,7 @@ export default class AuctionBidBox extends Component {
                     funds.
                   </Explanation>
 
-                  <ActionButton onClick={() => this.withdrawFunds()}>
+                  <ActionButton onClick={() => this.withdrawBalance()}>
                     Withdraw
                   </ActionButton>
                   <Spacer />
@@ -294,6 +291,6 @@ AuctionBidBox.propTypes = {
   bidIncrement: PropTypes.object.isRequired,
   bidCallback: PropTypes.func.isRequired,
   withdrawCallback: PropTypes.func.isRequired,
-  withdrawArtCallback: PropTypes.func.isRequired,
+
   statusText: PropTypes.string.isRequired
 };

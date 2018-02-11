@@ -127,27 +127,15 @@ export default class Auction extends Component {
   }
 
   @action
-  async withdrawFunds() {
+  async withdrawBalance() {
     const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = bigNumber.minus(this.currentAccountBid);
     const params = {
-      from: this.props.store.currentAccount,
-      value: adjustedBid
+      from: this.props.store.currentAccount
     };
-    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
-    this.hideOwnBidWarning = false;
-  }
-
-  @action
-  async withdrawArt() {
-    const { auctionBaseInstance } = this.props.store;
-    const adjustedBid = bigNumber.minus(this.currentAccountBid);
-    const params = {
-      from: this.props.store.currentAccount,
-      value: adjustedBid
-    };
-    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
-    this.hideOwnBidWarning = false;
+    const receipt = await auctionBaseInstance.withdrawBalance(
+      this.auction.id,
+      params
+    );
   }
 
   @computed
@@ -219,8 +207,7 @@ export default class Auction extends Component {
               currentAccountBid={this.currentAccountBid}
               statusText={this.statusText}
               bidCallback={bid => this.placeBid(bid)}
-              withdrawCallback={() => this.withdrawFunds()}
-              withdrawArtCallback={() => this.withdrawArt()}
+              withdrawCallback={() => this.withdrawBalance()}
             />
           </RightContainer>
         </Container>
