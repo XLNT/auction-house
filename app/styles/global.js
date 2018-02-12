@@ -7,7 +7,7 @@ injectGlobal`
     height: 100%;
   }
   body {
-    background-color: #fff;
+    background-color: black;
     margin: 0;
     padding: 0;
     font-family: ${sansSerif};

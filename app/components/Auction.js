@@ -2,35 +2,34 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
-import styled from "react-emotion";
 import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
   Button,
   Badge,
   Spacer,
+  LeftContainer,
+  RightContainer,
   colors,
   basePadding,
   fontSizes,
   darken
 } from "../styles";
-
-const AuctionGallery = styled("div")`
-  width: 100%;
-  height: 400px;
-  background-color: ${colors.yellow};
-`;
-
-const AuctionHeading = styled("span")`
-  font-size: ${fontSizes.huge};
-  font-weight: 600;
-  display: inline-block;
-`;
+import test from "../images/test.png";
+import {
+  Container,
+  Status,
+  StatusPulse,
+  Gallery,
+  Heading,
+  Description,
+  SellerInformation
+} from "./auction/auction";
 
 @inject("store")
 @observer
 export default class Auction extends Component {
-  @observable auction;
+  @observable auction = undefined;
   @observable loadingAuction = true;
   @observable currentAccountBid = new BigNumber(0);
   @observable hideOwnBidWarning = false;
@@ -46,7 +45,8 @@ export default class Auction extends Component {
           change => {
             this.getAuction(auctionId);
             this.getCurrentAccountBid(auctionId);
-          }
+          },
+          true // invoke immediately
         );
       }
     );
@@ -65,7 +65,12 @@ export default class Auction extends Component {
   @action
   async getAuction(_id) {
     this.loadingAuction = true;
-    const { auctionBaseInstance, currentBlock } = this.props.store;
+    const {
+      auctionBaseInstance,
+      currentBlock,
+      curatorInstance,
+      ipfsNode
+    } = this.props.store;
     const [
       id,
       nftAddress,
@@ -78,7 +83,13 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await auctionBaseInstance.getAuction(_id, {}, currentBlock);
+    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+
+    const nftData = await curatorInstance.assetData(tokenId, currentBlock);
+
+    const data = await ipfsNode.object.data(nftData);
+    const jsonData = JSON.parse(data.toString());
+
     this.auction = {
       id,
       nftAddress,
@@ -90,8 +101,10 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      nftMetadata: jsonData
     };
+
     this.loadingAuction = false;
   }
 
@@ -127,31 +140,36 @@ export default class Auction extends Component {
   }
 
   @action
-  hideBidWarning() {
-    this.hideOwnBidWarning = true;
+  async withdrawBalance() {
+    const { auctionBaseInstance } = this.props.store;
+    const params = {
+      from: this.props.store.currentAccount
+    };
+    const receipt = await auctionBaseInstance.withdrawBalance(
+      this.auction.id,
+      params
+    );
   }
 
   @computed
-  get nextMinBid() {
-    if (!this.auction) return false;
-    const { highestBid, bidIncrement } = this.auction;
-    return highestBid.plus(bidIncrement).minus(this.currentAccountBid);
+  get statusText() {
+    const { status } = this.auction;
+    if (status.equals(0)) return "Live";
+    else if (status.equals(1)) return "Cancelled";
+    else return "Completed";
   }
 
   @computed
-  get highestEthBid() {
-    return this.props.store.web3.fromWei(this.auction.highestBid, "ether");
-  }
-
-  @computed
-  get showBidBox() {
-    const ownHighestBid =
-      this.auction.highestBidder == this.props.store.currentAccount;
-    return !ownHighestBid || this.hideOwnBidWarning;
+  get statusColor() {
+    const { status } = this.auction;
+    if (status.equals(0)) return colors.green;
+    else if (status.equals(1)) return colors.yellow;
+    else return colors.blue;
   }
 
   render() {
-    if (this.loadingAuction) return <div>Loading...</div>;
+    if (this.loadingAuction)
+      return <div style={{ color: colors.blue }}>Loading...</div>;
     const {
       id,
       nftAddress,
@@ -163,57 +181,60 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      nftMetadata
     } = this.auction;
 
-    const isActive = status.equals(0);
+    const { creator, description, name, resourceIdentifiers } = nftMetadata;
 
     return (
       <Wrapper>
-        <Spacer />
-        <div>
-          <AuctionHeading>Auction {id.toString()}</AuctionHeading>{" "}
-          {isActive && <Badge color={colors.green}>LIVE</Badge>}
-        </div>
-        <Spacer />
-        <AuctionGallery />
-        <Spacer />
-        <div>
-          <b>Metadata</b>
-          <Spacer size={0.5} />
-          <div>
-            NFT: {tokenId.toString()}@{nftAddress}
-          </div>
-          <div>Seller: {seller}</div>
-        </div>
-        <Spacer />
-        <div>
-          <b>Current highest bid:</b>{" "}
-          {highestBid > 0 ? (
-            <span>
-              {this.highestEthBid.toString()} ETH from{" "}
-              {highestBidder == this.props.store.currentAccount
-                ? "you"
-                : highestBidder}
-            </span>
-          ) : (
-            <span>No bids yet</span>
-          )}
-        </div>
-        <Spacer />
-        {this.showBidBox ? (
-          <AuctionBidBox
-            highestBid={highestBid}
-            bidIncrement={bidIncrement}
-            callback={bid => this.placeBid(bid)}
-          />
-        ) : (
-          <span>
-            <b>🎉 You're the highest bidder!</b>{" "}
-            <a onClick={() => this.hideBidWarning()}>Bid higher?</a>
-          </span>
-        )}
-        <Spacer size={2} />
+        <Spacer size={3} />
+        <Container>
+          <LeftContainer width={60}>
+            <Status>
+              {this.statusText}{" "}
+              <StatusPulse
+                active={this.statusText == "Live"}
+                color={this.statusColor}
+              />
+            </Status>
+
+            <Spacer size={0.5} />
+
+            <Heading>Auction #{id.toString()}</Heading>
+            <SellerInformation>by {seller}</SellerInformation>
+            <Spacer size={0.5} />
+            <Description>
+              NFT: {tokenId.toString()}@{nftAddress}
+              <Spacer />
+              Name: {name}
+              <Spacer />
+              Creator: {creator}
+              <Spacer />
+              Description: {description}
+            </Description>
+            <Spacer />
+
+            <Gallery>
+              <img
+                src={`https://ipfs.io/ipfs/${resourceIdentifiers.default}`}
+              />
+            </Gallery>
+          </LeftContainer>
+
+          <RightContainer width={35}>
+            <AuctionBidBox
+              highestBid={highestBid}
+              highestBidder={highestBidder}
+              bidIncrement={bidIncrement}
+              currentAccountBid={this.currentAccountBid}
+              statusText={this.statusText}
+              bidCallback={bid => this.placeBid(bid)}
+              withdrawCallback={() => this.withdrawBalance()}
+            />
+          </RightContainer>
+        </Container>
       </Wrapper>
     );
   }

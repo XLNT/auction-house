@@ -26,6 +26,23 @@ export const Wrapper = styled("div")`
   width: 95%;
   max-width: ${screenWidth}px;
   margin: auto;
+  ${props =>
+    props.color &&
+    `
+    background-color: ${props.color};
+  `};
+`;
+
+export const LeftContainer = styled("div")`
+  width: ${props => (props.width ? props.width : `100`)}%;
+  float: left;
+  padding: ${basePadding / 2}px;
+`;
+
+export const RightContainer = styled("div")`
+  width: ${props => (props.width ? props.width : `100`)}%;
+  float: right;
+  padding: ${basePadding / 2}px;
 `;
 
 export const Line = styled("hr")`
@@ -48,5 +65,19 @@ export class Divider extends Component {
         {padded && <Spacer size={size} />}
       </div>
     );
+  }
+}
+
+export class FloatRight extends Component {
+  render() {
+    const { children } = this.props;
+    return <div style={{ float: "right" }}>{children}</div>;
+  }
+}
+
+export class Centered extends Component {
+  render() {
+    const { children } = this.props;
+    return <div style={{ textAlign: "center" }}>{children}</div>;
   }
 }

@@ -1,5 +1,5 @@
 import styled from "react-emotion";
-import { colors } from "../styles";
+import { colors, basePadding } from "../styles";
 
 export const Badge = styled("span")`
   display: inline-block;
@@ -9,8 +9,8 @@ export const Badge = styled("span")`
   background-color: ${props => (props.color ? props.color : colors.black)};
   color: ${props => (props.textColor ? props.textColor : "#fff")};
   text-transform: uppercase;
-  font-size: 0.7em;
+  font-size: 1em;
   font-weight: 600;
-  margin-top: -2px;
+  margin-top: ${basePadding * -1}px;
   vertical-align: middle;
 `;

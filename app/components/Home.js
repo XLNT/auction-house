@@ -26,7 +26,7 @@ import test from "../images/test.png";
 
 @inject("store")
 @observer
-export default class AuctionList extends Component {
+export default class Home extends Component {
   @observable auctions = [];
   @observable auctionsLength = new BigNumber(0);
 
@@ -89,12 +89,7 @@ export default class AuctionList extends Component {
   }
 
   async importAuction(_id) {
-    const {
-      currentBlock,
-      auctionBaseInstance,
-      curatorInstance,
-      ipfsNode
-    } = this.props.store;
+    const { currentBlock, auctionBaseInstance } = this.props.store;
     const [
       id,
       nftAddress,
@@ -108,8 +103,6 @@ export default class AuctionList extends Component {
       highestBid,
       highestBidder
     ] = await auctionBaseInstance.getAuction(_id, currentBlock);
-    const nftData = await curatorInstance.assetData(tokenId, currentBlock);
-    const { value } = await ipfsNode.dag.get(nftData);
     return {
       id,
       nftAddress,
@@ -143,17 +136,40 @@ export default class AuctionList extends Component {
 
     return (
       <Wrapper>
-        <ul>
-          {this.auctions.map(auction => {
-            return (
-              <li key={auction.id.toString()}>
-                <Link to={`/auction/${auction.id.toString()}`}>
-                  {auction.id.toString()}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <Spacer size={3} />
+        <Container style={{ color: `white` }}>
+          <LeftContainer width={40}>
+            <Status>
+              {this.statusText(auctionOfInterest.status)}{" "}
+              <StatusPulse
+                active={this.statusText(auctionOfInterest.status) == "Live"}
+                color={this.statusColor(auctionOfInterest.status)}
+              />
+            </Status>
+            <Spacer size={0.5} />
+
+            <Heading>Auction #{auctionOfInterest.id.toString()}</Heading>
+            <SellerInformation>by {auctionOfInterest.seller}</SellerInformation>
+            <Spacer size={0.5} />
+
+            <Description>
+              NFT: {auctionOfInterest.tokenId.toString()}@{
+                auctionOfInterest.nftAddress
+              }
+            </Description>
+            <Divider padded={1.5} />
+            <CountDown endDate={new Date().getTime() + 100000000} />
+            <Spacer />
+            <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
+              <Button>View</Button>
+            </Link>
+          </LeftContainer>
+          <RightContainer width={55}>
+            <Gallery>
+              <img src={test} />
+            </Gallery>
+          </RightContainer>
+        </Container>
       </Wrapper>
     );
   }

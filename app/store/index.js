@@ -1,35 +1,46 @@
-import { action, observable } from "mobx";
+import { action, observable, computed } from "mobx";
 import contract from "truffle-contract";
-import { AuctionBase, HillCore } from "../contracts";
+import { Curator } from "curator-contracts";
+import { AuctionBase } from "auction-contracts";
+import IPFS from "ipfs";
 
 export default class Store {
-  @observable currentAccount = null;
   @observable currentBlock = "latest";
+  @observable currentAccount = null;
+  @observable currentNetwork = null;
   @observable auctionBaseInstance = null;
-  @observable hillCoreInstance = null;
+  @observable curatorInstance = null;
 
   constructor(web3) {
     this.web3 = web3;
+    this.ipfsNode = new IPFS();
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
+    this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
+
     // Setup AuctionBase contract
-    const AuctionBaseContract = contract({
-      abi: AuctionBase.abi
-    });
+    const AuctionBaseContract = contract(AuctionBase);
     AuctionBaseContract.setProvider(this.web3.currentProvider);
-    AuctionBaseContract.at(AuctionBase.address).then(instance => {
+    AuctionBaseContract.deployed().then(instance => {
       this.auctionBaseInstance = instance;
     });
 
-    // Setup CryptoHills contract
-    const HillCoreContract = contract({
-      abi: HillCore.abi
+    // Setup Curator contract
+    const CuratorContract = contract(Curator);
+    CuratorContract.setProvider(this.web3.currentProvider);
+    CuratorContract.deployed().then(instance => {
+      this.curatorInstance = instance;
     });
-    HillCoreContract.setProvider(this.web3.currentProvider);
-    HillCoreContract.at(HillCore.address).then(instance => {
-      this.hillCoreInstance = instance;
-    });
-    window.s = this;
+  }
+
+  @computed
+  get isReady() {
+    return (
+      this.currentAccount &&
+      this.currentBlock &&
+      this.curatorInstance &&
+      this.auctionBaseInstance
+    );
   }
 
   setCurrentAccount() {
@@ -40,18 +51,18 @@ export default class Store {
     );
   }
 
+  setCurrentNetwork() {
+    web3.version.getNetwork((error, network) => {
+      this.currentNetwork = network;
+    });
+  }
+
   setCurrentBlock() {
     this.web3.eth.getBlock(
       "latest",
-      action((err, res) => {
-        if (res.number != this.currentBlock) {
-          console.log(
-            "Changing current block from",
-            this.currentBlock,
-            "to",
-            res.number
-          );
-          this.currentBlock = res.number;
+      action((error, result) => {
+        if (result.number != this.currentBlock) {
+          this.currentBlock = result.number;
         }
       })
     );
