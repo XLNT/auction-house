@@ -89,7 +89,12 @@ export default class AuctionList extends Component {
   }
 
   async importAuction(_id) {
-    const { currentBlock, auctionBaseInstance } = this.props.store;
+    const {
+      currentBlock,
+      auctionBaseInstance,
+      curatorInstance,
+      ipfsNode
+    } = this.props.store;
     const [
       id,
       nftAddress,
@@ -103,6 +108,8 @@ export default class AuctionList extends Component {
       highestBid,
       highestBidder
     ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+    const nftData = await curatorInstance.assetData(tokenId, currentBlock);
+    const { value } = await ipfsNode.dag.get(nftData);
     return {
       id,
       nftAddress,
@@ -133,11 +140,20 @@ export default class AuctionList extends Component {
   render() {
     const auctionOfInterest = this.auctions[0];
     if (!auctionOfInterest) return null;
-    console.log(this.auctionsLength, this.auctions);
+
     return (
       <Wrapper>
-        Auction count: {this.auctionsLength.toString()},{" "}
-        {JSON.stringify(this.auctions)}
+        <ul>
+          {this.auctions.map(auction => {
+            return (
+              <li key={auction.id.toString()}>
+                <Link to={`/auction/${auction.id.toString()}`}>
+                  {auction.id.toString()}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </Wrapper>
     );
   }

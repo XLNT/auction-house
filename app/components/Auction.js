@@ -65,7 +65,12 @@ export default class Auction extends Component {
   @action
   async getAuction(_id) {
     this.loadingAuction = true;
-    const { auctionBaseInstance, currentBlock } = this.props.store;
+    const {
+      auctionBaseInstance,
+      currentBlock,
+      curatorInstance,
+      ipfsNode
+    } = this.props.store;
     const [
       id,
       nftAddress,
@@ -78,7 +83,16 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await auctionBaseInstance.getAuction(_id, {}, currentBlock);
+    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+
+    console.log("TOKEN ID", tokenId, currentBlock);
+
+    const nftData = await curatorInstance.assetData(tokenId, currentBlock);
+    console.log("NFTDATA", nftData);
+
+    const { value } = await ipfsNode.dag.get(nftData);
+    console.log("VALUE", value);
+
     this.auction = {
       id,
       nftAddress,
@@ -90,8 +104,10 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      nftMetadata: value
     };
+
     this.loadingAuction = false;
   }
 
@@ -168,8 +184,11 @@ export default class Auction extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      nftMetadata
     } = this.auction;
+
+    const { creator, description, name, resourceIdentifiers } = nftMetadata;
 
     return (
       <Wrapper>
@@ -191,11 +210,19 @@ export default class Auction extends Component {
             <Spacer size={0.5} />
             <Description>
               NFT: {tokenId.toString()}@{nftAddress}
+              <Spacer />
+              Name: {name}
+              <Spacer />
+              Creator: {creator}
+              <Spacer />
+              Description: {description}
             </Description>
             <Spacer />
 
             <Gallery>
-              <img src={test} />
+              <img
+                src={`https://ipfs.io/ipfs/${resourceIdentifiers.default}`}
+              />
             </Gallery>
           </LeftContainer>
 
