@@ -171,8 +171,9 @@ export default class Auction extends Component {
   @computed
   get endDate() {
     const { duration, startedAt } = this.auction;
+    // duration is in block numbers
     const startDate = moment.unix(startedAt.toString());
-    const endDate = startDate.add(duration.toString(), "seconds");
+    const endDate = startDate.add(duration.toNumber() * 14, "seconds");
     return endDate.toDate();
   }
 

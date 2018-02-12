@@ -132,13 +132,14 @@ export default class Home extends Component {
   }
 
   endDate({ duration, startedAt }) {
+    // duration is in block numbers
     const startDate = moment.unix(startedAt.toString());
-    const endDate = startDate.add(duration.toString(), "seconds");
+    const endDate = startDate.add(duration.toNumber() * 14, "seconds");
     return endDate.toDate();
   }
 
   render() {
-    const auctionOfInterest = this.auctions[0];
+    const auctionOfInterest = this.auctions[2];
     if (!auctionOfInterest) return null;
 
     return (
