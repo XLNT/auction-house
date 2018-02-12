@@ -2,6 +2,7 @@ import { action, observable, computed } from "mobx";
 import contract from "truffle-contract";
 import { Curator } from "curator-contracts";
 import { AuctionBase } from "auction-contracts";
+import IPFS from "ipfs";
 
 export default class Store {
   @observable currentBlock = "latest";
@@ -12,6 +13,7 @@ export default class Store {
 
   constructor(web3) {
     this.web3 = web3;
+    this.ipfsNode = new IPFS();
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
