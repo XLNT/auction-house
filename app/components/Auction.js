@@ -85,13 +85,10 @@ export default class Auction extends Component {
       highestBidder
     ] = await auctionBaseInstance.getAuction(_id, currentBlock);
 
-    console.log("TOKEN ID", tokenId, currentBlock);
-
     const nftData = await curatorInstance.assetData(tokenId, currentBlock);
-    console.log("NFTDATA", nftData);
 
-    const { value } = await ipfsNode.dag.get(nftData);
-    console.log("VALUE", value);
+    const data = await ipfsNode.object.data(nftData);
+    const jsonData = JSON.parse(data.toString());
 
     this.auction = {
       id,
@@ -105,7 +102,7 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder,
-      nftMetadata: value
+      nftMetadata: jsonData
     };
 
     this.loadingAuction = false;
