@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
+    "build":
+      "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
   },
   "author": "Paul Fletcher-Hill <pfletcherhill@gmail.com>",
   "license": "MIT",
@@ -25,7 +26,10 @@
     "react-router-dom": "^4.2.2",
     "tinycolor2": "^1.4.1",
     "truffle": "^4.0.5",
-    "truffle-contract": "git+ssh://git@github.com/pfletcherhill/truffle-contract.git",
+    "truffle-contract":
+      "git+ssh://git@github.com/pfletcherhill/truffle-contract.git",
+    "auction-contracts": "git+ssh://git@github.com:XLNT/auction-contracts.git",
+    "curator-contracts": "git+ssh://git@github.com:XLNT/curator-contracts.git",
     "web3": "^0.20.4",
     "webpack": "^3.10.0",
     "webpack-dev-middleware": "^2.0.4",

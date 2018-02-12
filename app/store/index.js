@@ -1,13 +1,14 @@
-import { action, observable } from "mobx";
+import { action, observable, computed } from "mobx";
 import contract from "truffle-contract";
-import { AuctionBase, HillCore } from "../contracts";
+import { Curator } from "curator-contracts";
+import { AuctionBase } from "auction-contracts";
 
 export default class Store {
   @observable currentBlock = "latest";
   @observable currentAccount = null;
   @observable currentNetwork = null;
   @observable auctionBaseInstance = null;
-  @observable hillCoreInstance = null;
+  @observable curatorInstance = null;
 
   constructor(web3) {
     this.web3 = web3;
@@ -16,22 +17,28 @@ export default class Store {
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
 
     // Setup AuctionBase contract
-    const AuctionBaseContract = contract({
-      abi: AuctionBase.abi
-    });
+    const AuctionBaseContract = contract(AuctionBase);
     AuctionBaseContract.setProvider(this.web3.currentProvider);
-    AuctionBaseContract.at(AuctionBase.address).then(instance => {
+    AuctionBaseContract.deployed().then(instance => {
       this.auctionBaseInstance = instance;
     });
 
-    // Setup CryptoHills contract
-    const HillCoreContract = contract({
-      abi: HillCore.abi
+    // Setup Curator contract
+    const CuratorContract = contract(Curator);
+    CuratorContract.setProvider(this.web3.currentProvider);
+    CuratorContract.deployed().then(instance => {
+      this.curatorInstance = instance;
     });
-    HillCoreContract.setProvider(this.web3.currentProvider);
-    HillCoreContract.at(HillCore.address).then(instance => {
-      this.hillCoreInstance = instance;
-    });
+  }
+
+  @computed
+  get isReady() {
+    return (
+      this.currentAccount &&
+      this.currentBlock &&
+      this.curatorInstance &&
+      this.auctionBaseInstance
+    );
   }
 
   setCurrentAccount() {

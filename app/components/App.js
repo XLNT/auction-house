@@ -6,6 +6,7 @@ import Header from "./Header";
 import Home from "./Home";
 import Auction from "./Auction";
 import About from "./About";
+import AuctionList from "./AuctionList";
 import MetamaskRequired from "./MetamaskRequired";
 
 export default class App extends Component {
@@ -23,6 +24,7 @@ export default class App extends Component {
                 </MetamaskRequired>
               )}
             />
+            <Route path="/auctions" component={AuctionList} />
             <Route exact path="/about" component={About} />
             <Route exact path="/" component={Home} />
           </div>
