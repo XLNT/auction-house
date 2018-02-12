@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
+import moment from "moment";
 import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
@@ -167,6 +168,14 @@ export default class Auction extends Component {
     else return colors.blue;
   }
 
+  @computed
+  get endDate() {
+    const { duration, startedAt } = this.auction;
+    const startDate = moment.unix(startedAt.toString());
+    const endDate = startDate.add(duration.toString(), "seconds");
+    return endDate.toDate();
+  }
+
   render() {
     if (this.loadingAuction)
       return <div style={{ color: colors.blue }}>Loading...</div>;
@@ -225,6 +234,7 @@ export default class Auction extends Component {
 
           <RightContainer width={35}>
             <AuctionBidBox
+              endDate={this.endDate}
               highestBid={highestBid}
               highestBidder={highestBidder}
               bidIncrement={bidIncrement}

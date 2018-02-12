@@ -23,6 +23,7 @@ import {
 } from "./auction/auction";
 import CountDown from "./CountDown";
 import test from "../images/test.png";
+import moment from "moment";
 
 @inject("store")
 @observer
@@ -130,6 +131,12 @@ export default class Home extends Component {
     else return colors.blue;
   }
 
+  endDate({ duration, startedAt }) {
+    const startDate = moment.unix(startedAt.toString());
+    const endDate = startDate.add(duration.toString(), "seconds");
+    return endDate.toDate();
+  }
+
   render() {
     const auctionOfInterest = this.auctions[0];
     if (!auctionOfInterest) return null;
@@ -158,7 +165,7 @@ export default class Home extends Component {
               }
             </Description>
             <Divider padded={1.5} />
-            <CountDown endDate={new Date().getTime() + 100000000} />
+            <CountDown endDate={this.endDate(auctionOfInterest)} />
             <Spacer />
             <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
               <Button>View</Button>
