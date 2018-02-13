@@ -1,16 +1,5 @@
 import React, { Component } from "react";
-import {
-  action,
-  autorun,
-  computed,
-  observable,
-  observe,
-  runInAction,
-  when
-} from "mobx";
 import { inject, observer } from "mobx-react";
-import { Link } from "react-router-dom";
-import BigNumber from "bignumber.js";
 import {
   Spacer,
   Divider,
@@ -19,26 +8,59 @@ import {
   basePadding,
   lighten
 } from "../styles";
-import {
-  Status,
-  StatusPulse,
-  Heading,
-  Description,
-  SellerInformation
-} from "./auction/auction";
 import CountDown from "./CountDown";
-import styled from "react-emotion";
+import styled, { keyframes } from "react-emotion";
+
+function pulseBuilder() {
+  const pulse = keyframes`
+    0% { -webkit-transform: scale(0) }
+    100% {
+      -webkit-transform: scale(0.75);
+      opacity: 50;
+    }
+  `;
+  return pulse;
+}
+
+const Status = styled("div")`
+  font-size: 15px;
+  font-weight: 400;
+  text-transform: uppercase;
+  display: inline-block;
+  color: ${colors.green};
+`;
+
+const StatusPulse = styled("div")`
+  background-color: ${props => (props.color ? props.color : colors.black)};
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  margin-bottom 2px;
+  border-radius: 100%;
+  animation:  ${props =>
+    props.active && `${pulseBuilder()} 1.5s infinite ease-in-out`};
+`;
+
+const Heading = styled("span")`
+  font-size: 40px;
+  font-weight: 600;
+  display: inline-block;
+`;
+
+const SellerInformation = styled("div")`
+  font-weight: 100;
+  font-size: 14px;
+`;
+
+const Description = styled("div")`
+  font-size: 18px;
+  font-weight: 300;
+`;
 
 @inject("store")
 @inject("auctionStore")
 @observer
 export default class AuctionInfo extends Component {
-  statusText(status) {
-    if (status.equals(0)) return "Live";
-    else if (status.equals(1)) return "Cancelled";
-    else return "Completed";
-  }
-
   statusColor(status) {
     if (status.equals(0)) return colors.green;
     else if (status.equals(1)) return colors.yellow;
@@ -46,24 +68,30 @@ export default class AuctionInfo extends Component {
   }
 
   render() {
-    const { auction } = this.props.auctionStore;
+    const { auction, statusText } = this.props.auctionStore;
     return (
       <div>
         <Status>
-          {this.statusText(auction.status)}{" "}
+          {statusText}{" "}
           <StatusPulse
-            active={this.statusText(auction.status) == "Live"}
+            active={statusText == "Live"}
             color={this.statusColor(auction.status)}
           />
         </Status>
         <Spacer size={0.5} />
 
-        <Heading>Auction #{auction.id.toString()}</Heading>
-        <SellerInformation>by {auction.seller}</SellerInformation>
+        <div>Auction #{auction.id.toString()}</div>
+        <Heading>{auction.nftMetadata.name}</Heading>
+        <SellerInformation>
+          Created by {auction.nftMetadata.creator}
+        </SellerInformation>
         <Spacer size={0.5} />
 
         <Description>
-          NFT: {auction.tokenId.toString()}@{auction.nftAddress}
+          <div>
+            NFT: {auction.tokenId.toString()}@{auction.nftAddress}
+          </div>
+          <div>{auction.nftMetadata.decription}</div>
         </Description>
       </div>
     );

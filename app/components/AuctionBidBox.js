@@ -4,9 +4,14 @@ import { inject, observer } from "mobx-react";
 import { observable, action, runInAction, computed } from "mobx";
 import styled from "react-emotion";
 import BigNumber from "bignumber.js";
-
-import { Spacer, Centered, basePadding, colors, lighten } from "../styles";
-import { Line } from "./auction/auction";
+import {
+  Spacer,
+  Centered,
+  basePadding,
+  colors,
+  lighten,
+  Button
+} from "../styles";
 import CountDown from "./CountDown";
 
 const Title = styled("div")`

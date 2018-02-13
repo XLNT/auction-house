@@ -106,7 +106,7 @@ export default class Store {
 
   // Getters
   async getAuctionsLength() {
-    this.auctionsLength = await this.auctionBaseInstance.getAuctionsCount(
+    this.auctionsLength = await this.readOnlyAuctionBaseInstance.getAuctionsCount(
       {},
       this.currentBlock
     );
@@ -138,7 +138,10 @@ export default class Store {
       status,
       highestBid,
       highestBidder
-    ] = await this.auctionBaseInstance.getAuction(_id, this.currentBlock);
+    ] = await this.readOnlyAuctionBaseInstance.getAuction(
+      _id,
+      this.currentBlock
+    );
     const nftData = await this.curatorInstance.assetData(
       tokenId,
       this.currentBlock
