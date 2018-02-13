@@ -104,6 +104,7 @@ export default class Home extends Component {
       highestBid,
       highestBidder
     ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+    const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
     return {
       id,
       nftAddress,
@@ -115,7 +116,8 @@ export default class Home extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      endDate
     };
   }
 
@@ -131,13 +133,8 @@ export default class Home extends Component {
     else return colors.blue;
   }
 
-  endDate({ duration, startedAt }) {
-    // duration is in block numbers (avg 14 seconds each)
-    return getEndDate(startedAt.toString(), duration.toNumber() * 14);
-  }
-
   render() {
-    const auctionOfInterest = this.auctions[2];
+    const auctionOfInterest = this.auctions[0];
     if (!auctionOfInterest) return null;
 
     return (
@@ -164,7 +161,7 @@ export default class Home extends Component {
               }
             </Description>
             <Divider padded={1.5} />
-            <CountDown endDate={this.endDate(auctionOfInterest)} />
+            <CountDown endDate={auctionOfInterest.endDate} />
             <Spacer />
             <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
               <Button>View</Button>

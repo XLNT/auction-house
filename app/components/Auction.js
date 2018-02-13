@@ -91,6 +91,8 @@ export default class Auction extends Component {
     const data = await ipfsNode.object.data(nftData);
     const jsonData = JSON.parse(data.toString());
 
+    const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
+
     this.auction = {
       id,
       nftAddress,
@@ -103,6 +105,7 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder,
+      endDate,
       nftMetadata: jsonData
     };
 
@@ -168,13 +171,6 @@ export default class Auction extends Component {
     else return colors.blue;
   }
 
-  @computed
-  get endDate() {
-    const { duration, startedAt } = this.auction;
-    // duration is in block numbers (avg 14 seconds each)
-    return getEndDate(startedAt.toString(), duration.toNumber() * 14);
-  }
-
   render() {
     if (this.loadingAuction)
       return <div style={{ color: colors.blue }}>Loading...</div>;
@@ -190,6 +186,7 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder,
+      endDate,
       nftMetadata
     } = this.auction;
 
@@ -233,7 +230,7 @@ export default class Auction extends Component {
 
           <RightContainer width={35}>
             <AuctionBidBox
-              endDate={this.endDate}
+              endDate={endDate}
               highestBid={highestBid}
               highestBidder={highestBidder}
               bidIncrement={bidIncrement}
