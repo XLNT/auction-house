@@ -31,7 +31,6 @@ export default class Auction extends Component {
 
   render() {
     const { auction } = this.auctionStore;
-    console.log("Render Auction", this.auctionStore.auctionId);
     return (
       <Provider auctionStore={this.auctionStore}>
         {auction ? (
