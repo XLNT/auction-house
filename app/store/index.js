@@ -8,26 +8,33 @@ export default class Store {
   @observable currentBlock = "latest";
   @observable currentAccount = null;
   @observable currentNetwork = null;
-  @observable auctionBaseInstance = null;
+  @observable readOnlyAuctionBaseInstance = null;
+  @observable writeOnlyAuctionBaseInstance = null;
   @observable curatorInstance = null;
 
-  constructor(web3) {
-    this.web3 = web3;
+  constructor(readOnlyWeb3, writeOnlyWeb3) {
+    this.web3 = readOnlyWeb3;
     this.ipfsNode = new IPFS();
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
 
-    // Setup AuctionBase contract
+    // Setup read only AuctionBase contract
     const AuctionBaseContract = contract(AuctionBase);
-    AuctionBaseContract.setProvider(this.web3.currentProvider);
+    AuctionBaseContract.setProvider(this.readOnlyWeb3.currentProvider);
     AuctionBaseContract.deployed().then(instance => {
-      this.auctionBaseInstance = instance;
+      this.readOnlyAuctionBaseInstance = instance;
+    });
+
+    // Setup write only AuctionBase contract
+    AuctionBaseContract.setProvider(this.writeOnlyWeb3.currentProvider);
+    AuctionBaseContract.deployed().then(instance => {
+      this.writeOnlyAuctionBaseInstance = instance;
     });
 
     // Setup Curator contract
     const CuratorContract = contract(Curator);
-    CuratorContract.setProvider(this.web3.currentProvider);
+    CuratorContract.setProvider(this.readOnlyWeb3.currentProvider);
     CuratorContract.deployed().then(instance => {
       this.curatorInstance = instance;
     });
@@ -41,7 +48,8 @@ export default class Store {
       this.currentAccount &&
       this.currentBlock &&
       this.curatorInstance &&
-      this.auctionBaseInstance
+      this.readOnlyAuctionBaseInstance &&
+      this.writeOnlyAuctionBaseInstance
     );
   }
 
