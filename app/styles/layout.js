@@ -34,13 +34,13 @@ export const Wrapper = styled("div")`
 `;
 
 export const LeftContainer = styled("div")`
-  width: ${props => (props.width ? props.width : `100`)}%;
+  width: ${props => (props.width ? props.width : "100")}%;
   float: left;
   padding: ${basePadding / 2}px;
 `;
 
 export const RightContainer = styled("div")`
-  width: ${props => (props.width ? props.width : `100`)}%;
+  width: ${props => (props.width ? props.width : "100")}%;
   float: right;
   padding: ${basePadding / 2}px;
 `;

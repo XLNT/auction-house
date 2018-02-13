@@ -1,21 +1,15 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { action, autorun, computed, observable, observe, when } from "mobx";
+import { action, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
 import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
-  Button,
-  Badge,
   Spacer,
   LeftContainer,
   RightContainer,
-  colors,
-  basePadding,
-  fontSizes,
-  darken
+  colors
 } from "../styles";
-import test from "../images/test.png";
 import {
   Container,
   Status,
@@ -42,7 +36,7 @@ export default class Auction extends Component {
         this.blockWatcher = observe(
           this.props.store,
           "currentBlock",
-          change => {
+          () => {
             this.getAuction(auctionId);
             this.getCurrentAccountBid(auctionId);
           },
@@ -137,10 +131,7 @@ export default class Auction extends Component {
       from: this.props.store.currentAccount,
       value: adjustedBid
     };
-    const receipt = await writeOnlyAuctionBaseInstance.bid(
-      this.auction.id,
-      params
-    );
+    await writeOnlyAuctionBaseInstance.bid(this.auction.id, params);
   }
 
   @action
@@ -149,10 +140,7 @@ export default class Auction extends Component {
     const params = {
       from: this.props.store.currentAccount
     };
-    const receipt = await writeOnlyAuctionBaseInstance.withdrawBalance(
-      this.auction.id,
-      params
-    );
+    await writeOnlyAuctionBaseInstance.withdrawBalance(this.auction.id, params);
   }
 
   @computed
@@ -172,18 +160,15 @@ export default class Auction extends Component {
   }
 
   render() {
-    if (this.loadingAuction)
+    if (this.loadingAuction) {
       return <div style={{ color: colors.blue }}>Loading...</div>;
+    }
     const {
       id,
       nftAddress,
       tokenId,
       seller,
       bidIncrement,
-      duration,
-      startedAt,
-      startBlock,
-      status,
       highestBid,
       highestBidder,
       endDate,
@@ -200,7 +185,7 @@ export default class Auction extends Component {
             <Status>
               {this.statusText}{" "}
               <StatusPulse
-                active={this.statusText == "Live"}
+                active={this.statusText === "Live"}
                 color={this.statusColor}
               />
             </Status>

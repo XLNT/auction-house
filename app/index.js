@@ -15,7 +15,6 @@ const render = (Component, props) => {
   );
 };
 
-let web3Provided;
 let store;
 
 window.onload = () => {
@@ -24,7 +23,9 @@ window.onload = () => {
     : new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
 
   const writeOnlyWeb3Provider =
-    typeof web3 !== "undefined" ? new Web3(web3.currentProvider) : undefined;
+    typeof global.web3 !== "undefined"
+      ? new Web3(global.web3.currentProvider)
+      : undefined;
 
   console.log(readOnlyWeb3Provider.currentProvider);
   console.log(writeOnlyWeb3Provider.currentProvider);

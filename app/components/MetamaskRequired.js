@@ -2,14 +2,7 @@ import React, { Component } from "react";
 import { observer, inject } from "mobx-react";
 import { computed } from "mobx";
 import styled, { keyframes } from "react-emotion";
-import {
-  Wrapper,
-  Spacer,
-  headerHeight,
-  basePadding,
-  colors,
-  Centered
-} from "../styles";
+import { Wrapper, Spacer, colors, Centered } from "../styles";
 import metamask from "../images/metamask.png";
 
 function shakeBuilder() {
@@ -146,8 +139,9 @@ export default class MetamaskRequired extends Component {
   render() {
     const { currentAccount, currentNetwork } = this.props.store;
     if (!currentAccount) return <MetamaskLocked />;
-    if (process.env.STAGE !== "development" && currentNetwork !== "1")
+    if (process.env.STAGE !== "development" && currentNetwork !== "1") {
       return <WrongNetwork networkName={this.currentNetworkName} />;
+    }
     return this.props.children;
   }
 }

@@ -1,12 +1,9 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { observable, computed } from "mobx";
 import { Link } from "react-router-dom";
 import styled from "react-emotion";
 import {
   Wrapper,
-  Spacer,
-  Divider,
   headerHeight,
   basePadding,
   colors,
