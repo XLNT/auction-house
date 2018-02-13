@@ -72,7 +72,7 @@ export default class AuctionInfoBox extends Component {
               NFT: {auction.tokenId.toString()}@{auction.nftAddress}
             </Description>
             <Divider padded={1.5} />
-            <CountDown endDate={new Date().getTime() + 100000000} />
+            <CountDown endDate={auction.endDate} />
             <Spacer />
             <Link to={`/auction/${auction.id.toString()}`}>
               <Button>View</Button>

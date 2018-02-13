@@ -169,7 +169,7 @@ export default class AuctionBidBox extends Component {
           <Spacer />
           <SectionTitle> Time Left</SectionTitle>
           <CountDown
-            endDate={new Date().getTime() + 100000000}
+            endDate={this.props.endDate}
             completed={this.auctionCompleted}
           />
         </ContainerSection>
@@ -184,6 +184,15 @@ export default class AuctionBidBox extends Component {
               <Line />
             </span>
           )}
+        {this.statusText !== "Cancelled" && (
+          <span>
+            <ContainerSection>
+              <SectionTitle>Highest Bid</SectionTitle>
+              <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
+            </ContainerSection>
+            <Line />
+          </span>
+        )}
         {this.statusText !== "Cancelled" && (
           <span>
             <ContainerSection>

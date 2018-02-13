@@ -10,6 +10,8 @@ import contract from "truffle-contract";
 import { Curator } from "curator-contracts";
 import { AuctionBase } from "auction-contracts";
 import BigNumber from "bignumber.js";
+import IPFS from "ipfs";
+import { getEndDate } from "../utils";
 
 export default class Store {
   @observable currentBlock = "latest";
@@ -27,6 +29,7 @@ export default class Store {
 
   constructor(web3) {
     this.web3 = web3;
+    this.ipfsNode = new IPFS();
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
@@ -128,6 +131,16 @@ export default class Store {
       highestBid,
       highestBidder
     ] = await this.auctionBaseInstance.getAuction(_id, this.currentBlock);
+    console.log("import", tokenId, this.curatorInstance);
+    const nftData = await this.curatorInstance.assetData(
+      tokenId,
+      this.currentBlock
+    );
+    console.log("nft", nftData);
+    const data = await this.ipfsNode.object.data(nftData);
+    console.log("data", data);
+    const jsonData = JSON.parse(data.toString());
+    const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
     return {
       id,
       nftAddress,
@@ -139,7 +152,9 @@ export default class Store {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      endDate,
+      nftMetadata: jsonData
     };
   }
 

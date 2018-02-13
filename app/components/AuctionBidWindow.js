@@ -122,7 +122,8 @@ export default class AuctionBidWindow extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      endDate
     } = this.auction;
 
     return (
@@ -134,6 +135,7 @@ export default class AuctionBidWindow extends Component {
           currentAccountBid={this.currentAccountBid}
           statusText={this.statusText}
           bidCallback={bid => this.placeBid(bid)}
+          endDate={endDate}
           withdrawCallback={() => this.withdrawBalance()}
         />
       </div>
