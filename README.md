@@ -23,8 +23,9 @@ Add an `.env` file depending on which port ganache is running on and which port 
 // .env
 PORT=5000
 RPC_HOST="127.0.0.1"
-RPC_PORT=8545
+RPC_PORT=8545 // 7545 if you use the Ganache GUI
 STAGE="development"
+WEB3_PROVIDER="https://localhost:8545"
 ```
 
 Compile and migrate your local smart contracts (both [auction-contracts](https://github.com/xlnt/auction-contracts) and [curator-contracts](https://github.com/xlnt/curator-contracts))
