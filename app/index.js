@@ -15,19 +15,22 @@ const render = (Component, props) => {
   );
 };
 
-let web3Provided;
 let store;
 
 window.onload = () => {
-  if (typeof web3 !== "undefined") {
-    web3Provided = new Web3(web3.currentProvider);
-  } else {
-    const host = process.env.RPC_HOST || "127.0.0.1";
-    const port = process.env.RPC_PORT || 7545;
-    web3Provided = new Web3(new Web3.providers.HttpProvider(`${host}:${port}`));
-  }
+  const readOnlyWeb3Provider = process.env.WEB3_PROVIDER
+    ? new Web3(new Web3.providers.HttpProvider(process.env.WEB3_PROVIDER))
+    : new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
 
-  store = new Store(web3Provided);
+  const writeOnlyWeb3Provider =
+    typeof global.web3 !== "undefined"
+      ? new Web3(global.web3.currentProvider)
+      : undefined;
+
+  console.log(readOnlyWeb3Provider.currentProvider);
+  console.log(writeOnlyWeb3Provider.currentProvider);
+
+  store = new Store(readOnlyWeb3Provider, writeOnlyWeb3Provider);
 
   render(App, { store });
 };

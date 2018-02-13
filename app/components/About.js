@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
-import { observable, action, runInAction, computed } from "mobx";
+import { observable } from "mobx";
 import styled from "react-emotion";
 
-import { Wrapper, Spacer, Centered, colors } from "../styles";
+import { Wrapper, Spacer, Centered } from "../styles";
 
 const Heading = styled("div")`
   font-size: 64px;

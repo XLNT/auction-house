@@ -17,7 +17,8 @@ export default class Store {
   @observable currentBlock = "latest";
   @observable currentAccount = null;
   @observable currentNetwork = null;
-  @observable auctionBaseInstance = null;
+  @observable readOnlyAuctionBaseInstance = null;
+  @observable writeOnlyAuctionBaseInstance = null;
   @observable curatorInstance = null;
   @observable auctions = [];
   @observable auctionsLength = new BigNumber(0);
@@ -27,23 +28,29 @@ export default class Store {
   @observable windows = [];
   @observable topZ = 1;
 
-  constructor(web3) {
-    this.web3 = web3;
+  constructor(readOnlyWeb3, writeOnlyWeb3) {
+    this.web3 = readOnlyWeb3;
     this.ipfsNode = new IPFS();
     this.accountInterval = setInterval(() => this.setCurrentAccount(), 500); // Ugh ಠ_ಠ
     this.networkInterval = setInterval(() => this.setCurrentNetwork(), 500);
     this.blockInterval = setInterval(() => this.setCurrentBlock(), 1000);
 
-    // Setup AuctionBase contract
+    // Setup read only AuctionBase contract
     const AuctionBaseContract = contract(AuctionBase);
-    AuctionBaseContract.setProvider(this.web3.currentProvider);
+    AuctionBaseContract.setProvider(readOnlyWeb3.currentProvider);
     AuctionBaseContract.deployed().then(instance => {
-      this.auctionBaseInstance = instance;
+      this.readOnlyAuctionBaseInstance = instance;
+    });
+
+    // Setup write only AuctionBase contract
+    AuctionBaseContract.setProvider(writeOnlyWeb3.currentProvider);
+    AuctionBaseContract.deployed().then(instance => {
+      this.writeOnlyAuctionBaseInstance = instance;
     });
 
     // Setup Curator contract
     const CuratorContract = contract(Curator);
-    CuratorContract.setProvider(this.web3.currentProvider);
+    CuratorContract.setProvider(readOnlyWeb3.currentProvider);
     CuratorContract.deployed().then(instance => {
       this.curatorInstance = instance;
     });
@@ -62,7 +69,8 @@ export default class Store {
       this.currentAccount &&
       this.currentBlock &&
       this.curatorInstance &&
-      this.auctionBaseInstance
+      this.readOnlyAuctionBaseInstance &&
+      this.writeOnlyAuctionBaseInstance
     );
   }
 
@@ -185,7 +193,7 @@ export default class Store {
   }
 
   setCurrentNetwork() {
-    web3.version.getNetwork((error, network) => {
+    this.web3.version.getNetwork((error, network) => {
       this.currentNetwork = network;
     });
   }
@@ -194,7 +202,7 @@ export default class Store {
     this.web3.eth.getBlock(
       "latest",
       action((error, result) => {
-        if (result.number != this.currentBlock) {
+        if (result.number !== this.currentBlock) {
           this.currentBlock = result.number;
         }
       })

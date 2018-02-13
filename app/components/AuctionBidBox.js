@@ -5,20 +5,8 @@ import { observable, action, runInAction, computed } from "mobx";
 import styled from "react-emotion";
 import BigNumber from "bignumber.js";
 
-import {
-  Button,
-  Input,
-  Spacer,
-  Divider,
-  Centered,
-  basePadding,
-  colors,
-  lighten,
-  transform
-} from "../styles";
-
+import { Spacer, Centered, basePadding, colors, lighten } from "../styles";
 import { Line } from "./auction/auction";
-
 import CountDown from "./CountDown";
 
 const Title = styled("div")`
@@ -45,7 +33,7 @@ const BidButton = styled("button")`
   font-size: 16px;
 
   &:hover {
-    background-color: ${lighten(`black`, 25)};
+    background-color: ${lighten("black", 25)};
   }
 
   &:disabled {

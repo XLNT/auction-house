@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { action, autorun, observable, observe, runInAction, when } from "mobx";
+import { observable, observe, when } from "mobx";
 import { inject, observer } from "mobx-react";
 import { withRouter } from "react-router-dom";
 import { Badge, Heading, Spacer } from "../styles";

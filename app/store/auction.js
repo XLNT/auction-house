@@ -42,12 +42,16 @@ export default class AuctionStore {
 
   @action
   async getCurrentAccountBid() {
-    const { auctionBaseInstance, currentAccount, currentBlock } = this.store;
-    if (!currentAccount) {
+    const {
+      readOnlyAuctionBaseInstance,
+      currentAccount,
+      currentBlock
+    } = this.store;
+    if (!this.store.isReady) {
       this.currentAccountBid = new BigNumber(0);
       return false;
     }
-    this.currentAccountBid = await auctionBaseInstance.getBid(
+    this.currentAccountBid = await readOnlyAuctionBaseInstance.getBid(
       this.auctionId,
       currentAccount,
       {},
@@ -57,22 +61,25 @@ export default class AuctionStore {
 
   @action
   async placeBid(bigNumber) {
-    const { auctionBaseInstance } = this.store;
+    const { writeOnlyAuctionBaseInstance } = this.store;
     const adjustedBid = bigNumber.minus(this.currentAccountBid);
     const params = {
       from: this.store.currentAccount,
       value: adjustedBid
     };
-    const receipt = await auctionBaseInstance.bid(this.auctionId, params);
+    const receipt = await writeOnlyAuctionBaseInstance.bid(
+      this.auctionId,
+      params
+    );
   }
 
   @action
   async withdrawBalance() {
-    const { auctionBaseInstance } = this.store;
+    const { writeOnlyAuctionBaseInstance } = this.store;
     const params = {
       from: this.store.currentAccount
     };
-    const receipt = await auctionBaseInstance.withdrawBalance(
+    const receipt = await writeOnlyAuctionBaseInstance.withdrawBalance(
       this.auctionId,
       params
     );
