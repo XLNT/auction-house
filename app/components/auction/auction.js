@@ -1,15 +1,5 @@
 import styled, { keyframes } from "react-emotion";
-import {
-  Wrapper,
-  Button,
-  Badge,
-  Spacer,
-  colors,
-  basePadding,
-  fontSizes,
-  darken,
-  transform
-} from "../../styles";
+import { colors } from "../../styles";
 
 function pulseBuilder() {
   const pulse = keyframes`

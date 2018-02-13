@@ -5,20 +5,8 @@ import { observable, action, runInAction, computed } from "mobx";
 import styled from "react-emotion";
 import BigNumber from "bignumber.js";
 
-import {
-  Button,
-  Input,
-  Spacer,
-  Divider,
-  Centered,
-  basePadding,
-  colors,
-  lighten,
-  transform
-} from "../styles";
-
+import { Spacer, Centered, basePadding, colors, lighten } from "../styles";
 import { Line } from "./auction/auction";
-
 import CountDown from "./CountDown";
 
 const Container = styled("div")`
@@ -57,7 +45,7 @@ const BidButton = styled("button")`
   font-size: 16px;
 
   &:hover {
-    background-color: ${lighten(`black`, 25)};
+    background-color: ${lighten("black", 25)};
   }
 
   &:disabled {
@@ -79,7 +67,7 @@ const ActionButton = styled("button")`
   text-transform: uppercase;
 
   &:hover {
-    background-color: ${lighten(`black`, 25)};
+    background-color: ${lighten("black", 25)};
   }
 
   &:disabled {
@@ -151,23 +139,23 @@ export default class AuctionBidBox extends Component {
 
   @computed
   get auctionCompleted() {
-    return this.props.statusText != "Live";
+    return this.props.statusText !== "Live";
   }
 
   @computed
   get userHasParticipated() {
     console.log(this.currentBid.toNumber());
-    return this.currentBid.toNumber() != 0;
+    return this.currentBid.toNumber() !== 0;
   }
 
   @computed
   get isFirstBidInAuction() {
-    return this.highestBid.toNumber() == 0;
+    return this.highestBid.toNumber() === 0;
   }
 
   @computed
   get userIsWinner() {
-    return this.highestBidder == this.props.store.currentAccount;
+    return this.props.highestBidder === this.props.store.currentAccount;
   }
 
   render() {

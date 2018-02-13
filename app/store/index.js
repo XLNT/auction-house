@@ -62,7 +62,7 @@ export default class Store {
   }
 
   setCurrentNetwork() {
-    web3.version.getNetwork((error, network) => {
+    this.web3.version.getNetwork((error, network) => {
       this.currentNetwork = network;
     });
   }
@@ -71,7 +71,7 @@ export default class Store {
     this.web3.eth.getBlock(
       "latest",
       action((error, result) => {
-        if (result.number != this.currentBlock) {
+        if (result.number !== this.currentBlock) {
           this.currentBlock = result.number;
         }
       })

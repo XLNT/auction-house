@@ -1,5 +1,5 @@
 import styled from "react-emotion";
-import { colors, basePadding, transform, lighten, darken } from "../styles";
+import { colors, basePadding, transform, lighten } from "../styles";
 
 export const Button = styled("button")`
   display: inline-block;
@@ -17,7 +17,7 @@ export const Button = styled("button")`
 
   &:active {
     box-shadow: 1px 1px ${colors.black};
-    ${transform(`translate(1px, 1px)`)};
+    ${transform("translate(1px, 1px)")};
   }
 
   &:disabled {

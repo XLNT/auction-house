@@ -1,28 +1,9 @@
 import React, { Component } from "react";
-import { action, autorun, observable, observe, runInAction, when } from "mobx";
+import { observable, observe, when } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import BigNumber from "bignumber.js";
-import {
-  Wrapper,
-  Spacer,
-  Divider,
-  colors,
-  LeftContainer,
-  RightContainer,
-  Button
-} from "../styles";
-import {
-  Container,
-  Status,
-  StatusPulse,
-  Gallery,
-  Heading,
-  Description,
-  SellerInformation
-} from "./auction/auction";
-import CountDown from "./CountDown";
-import test from "../images/test.png";
+import { Wrapper, colors } from "../styles";
 
 @inject("store")
 @observer
@@ -31,7 +12,6 @@ export default class AuctionList extends Component {
   @observable auctionsLength = new BigNumber(0);
 
   async componentDidMount() {
-    const { auctionId } = this.props.match.params;
     this.auctionBaseWatcher = when(
       () => this.props.store.readOnlyAuctionBaseInstance,
       () => {
@@ -39,7 +19,7 @@ export default class AuctionList extends Component {
         this.blockWatcher = observe(
           this.props.store,
           "currentBlock",
-          change => {
+          () => {
             this.getAuctionsLength();
           },
           true // invoke immediately
@@ -47,7 +27,7 @@ export default class AuctionList extends Component {
       }
     );
 
-    this.auctionsLengthWatcher = observe(this, "auctionsLength", change => {
+    this.auctionsLengthWatcher = observe(this, "auctionsLength", () => {
       this.getAuctions();
     });
   }
@@ -75,12 +55,7 @@ export default class AuctionList extends Component {
   }
 
   async getAuctions() {
-    const {
-      currentBlock,
-      currentAccount,
-      readOnlyAuctionBaseInstance
-    } = this.props.store;
-    if (this.auctionsLength == 0) return false;
+    if (this.auctionsLength === 0) return false;
     const promises = [];
     for (let i = 0; i < this.auctionsLength; i++) {
       promises.push(this.importAuction(i));
@@ -89,12 +64,7 @@ export default class AuctionList extends Component {
   }
 
   async importAuction(_id) {
-    const {
-      currentBlock,
-      readOnlyAuctionBaseInstance,
-      curatorInstance,
-      ipfsNode
-    } = this.props.store;
+    const { currentBlock, readOnlyAuctionBaseInstance } = this.props.store;
     const [
       id,
       nftAddress,
@@ -108,8 +78,6 @@ export default class AuctionList extends Component {
       highestBid,
       highestBidder
     ] = await readOnlyAuctionBaseInstance.getAuction(_id, currentBlock);
-    const nftData = await curatorInstance.assetData(tokenId, currentBlock);
-    const { value } = await ipfsNode.dag.get(nftData);
     return {
       id,
       nftAddress,
