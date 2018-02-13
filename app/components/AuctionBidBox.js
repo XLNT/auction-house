@@ -178,7 +178,7 @@ export default class AuctionBidBox extends Component {
             <Spacer />
             <SectionTitle> Time Left</SectionTitle>
             <CountDown
-              endDate={new Date().getTime() + 100000000}
+              endDate={this.props.endDate}
               completed={this.auctionCompleted}
             />
           </ContainerSection>
