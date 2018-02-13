@@ -7,7 +7,6 @@ import { Wrapper, Spacer, Centered, colors } from "../styles";
 
 const Heading = styled("div")`
   font-size: 64px;
-  color: white;
   width: 100%;
   font-weight: bold;
 `;
@@ -15,7 +14,6 @@ const Heading = styled("div")`
 const Description = styled("div")`
   font-size: 28px;
   font-weight: 200;
-  color: white;
   width: 100%;
 `;
 

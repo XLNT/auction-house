@@ -28,14 +28,15 @@ export const Container = styled("div")`
   flex-direction: row;
   flex-wrap: wrap;
   margin: auto;
+  padding: 0 ${basePadding}px;
 `;
 
 export const Status = styled("div")`
   font-size: 15px;
   font-weight: 400;
-  color: ${colors.grey};
   text-transform: uppercase;
   display: inline-block;
+  color: ${colors.green};
 `;
 
 export const StatusPulse = styled("div")`
@@ -53,19 +54,16 @@ export const Heading = styled("span")`
   font-size: 40px;
   font-weight: 600;
   display: inline-block;
-  color: white;
 `;
 
 export const SellerInformation = styled("div")`
   font-weight: 100;
   font-size: 14px;
-  color: white;
 `;
 
 export const Description = styled("div")`
   font-size: 18px;
   font-weight: 300;
-  color: white;
 `;
 
 export const Gallery = styled("div")`

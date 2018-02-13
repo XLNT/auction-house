@@ -4,16 +4,18 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build":
-      "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
+    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/webpack --config webpack.config.production.js"
   },
   "author": "Paul Fletcher-Hill <pfletcherhill@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "auction-contracts": "git+ssh://git@github.com:XLNT/auction-contracts.git",
+    "curator-contracts": "git+ssh://git@github.com:XLNT/curator-contracts.git",
     "dotenv": "^4.0.0",
     "emotion": "^9.0.0",
     "express": "^4.16.2",
     "file-loader": "^1.1.6",
+    "history": "^4.7.2",
     "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
     "mobx": "^3.4.1",
@@ -21,15 +23,14 @@
     "prop-types": "^15.6.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
+    "react-draggable": "^3.0.5",
     "react-emotion": "^9.0.0",
     "react-hot-loader": "^3.1.3",
     "react-router-dom": "^4.2.2",
     "tinycolor2": "^1.4.1",
     "truffle": "^4.0.5",
-    "truffle-contract":
-      "git+ssh://git@github.com/pfletcherhill/truffle-contract.git",
-    "auction-contracts": "git+ssh://git@github.com:XLNT/auction-contracts.git",
-    "curator-contracts": "git+ssh://git@github.com:XLNT/curator-contracts.git",
+    "truffle-contract": "git+ssh://git@github.com/pfletcherhill/truffle-contract.git",
+    "url-loader": "^0.6.2",
     "web3": "^0.20.4",
     "webpack": "^3.10.0",
     "webpack-dev-middleware": "^2.0.4",

@@ -21,13 +21,6 @@ import { Line } from "./auction/auction";
 
 import CountDown from "./CountDown";
 
-const Container = styled("div")`
-  border-radius: 8px;
-  display: block;
-  background-color: white;
-  box-shadow: 0 3px 8px 0 ${colors.darkGrey};
-`;
-
 const ContainerSection = styled("div")`
   padding: ${basePadding / 2}px ${basePadding / 2}px;
   display: block;
@@ -156,7 +149,6 @@ export default class AuctionBidBox extends Component {
 
   @computed
   get userHasParticipated() {
-    console.log(this.currentBid.toNumber());
     return this.currentBid.toNumber() != 0;
   }
 
@@ -173,115 +165,110 @@ export default class AuctionBidBox extends Component {
   render() {
     return (
       <Centered>
-        <Container>
-          <ContainerSection>
-            <Spacer />
-            <SectionTitle> Time Left</SectionTitle>
-            <CountDown
-              endDate={new Date().getTime() + 100000000}
-              completed={this.auctionCompleted}
-            />
-          </ContainerSection>
-          <Line />
-          {!this.isFirstBidInAuction &&
-            this.statusText !== "Cancelled" && (
-              <span>
-                <ContainerSection>
-                  <SectionTitle>Highest Bid</SectionTitle>
-                  <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
-                </ContainerSection>
-                <Line />
-              </span>
-            )}
-          {this.statusText !== "Cancelled" && (
+        <ContainerSection>
+          <Spacer />
+          <SectionTitle> Time Left</SectionTitle>
+          <CountDown
+            endDate={new Date().getTime() + 100000000}
+            completed={this.auctionCompleted}
+          />
+        </ContainerSection>
+        <Line />
+        {!this.isFirstBidInAuction &&
+          this.statusText !== "Cancelled" && (
             <span>
               <ContainerSection>
-                <SectionTitle>Your Bid</SectionTitle>
-                {this.userHasParticipated ? (
-                  <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
-                ) : (
-                  <Explanation>You haven't placed a bid yet.</Explanation>
-                )}
+                <SectionTitle>Highest Bid</SectionTitle>
+                <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
               </ContainerSection>
               <Line />
             </span>
           )}
-          {this.props.statusText === "Live" && (
+        {this.statusText !== "Cancelled" && (
+          <span>
             <ContainerSection>
-              <SectionTitle>Place Bid</SectionTitle>
-
-              <SectionData>
-                <BidButton
-                  disabled={!this.bidIsValid(this.downBid)}
-                  onClick={() => this.updateBid(this.downBid)}
-                >
-                  -
-                </BidButton>{" "}
-                {this.newEthBid.toNumber()} ETH{" "}
-                <BidButton
-                  disabled={!this.bidIsValid(this.upBid)}
-                  onClick={() => this.updateBid(this.upBid)}
-                >
-                  +
-                </BidButton>
-              </SectionData>
-              <Spacer />
-              <ActionButton onClick={() => this.submitBid()}>
-                {this.userHasParticipated ? "Another one" : "Place first bid"}
-              </ActionButton>
-              <Spacer />
-            </ContainerSection>
-          )}
-          {this.props.statusText === "Cancelled" && (
-            <ContainerSection>
-              <SectionTitle>Withdraw Funds</SectionTitle>
-
-              {this.userHasParticipated && (
-                <span>
-                  <Explanation>
-                    Unfortunately, this auction has been cancelled. Please
-                    withdraw your funds.
-                  </Explanation>
-
-                  <ActionButton onClick={() => this.withdrawBalance()}>
-                    Withdraw
-                  </ActionButton>
-                  <Spacer />
-                </span>
-              )}
-            </ContainerSection>
-          )}
-          {this.props.statusText === "Completed" && (
-            <ContainerSection>
-              {this.userIsWinner ? (
-                <span>
-                  <SectionTitle>Withdraw Art</SectionTitle>
-                  <Explanation>
-                    Congratulations, you won the auction!
-                  </Explanation>
-
-                  <ActionButton onClick={() => this.withdrawBalance()}>
-                    Claim Your Artwork
-                  </ActionButton>
-                  <Spacer />
-                </span>
+              <SectionTitle>Your Bid</SectionTitle>
+              {this.userHasParticipated ? (
+                <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
               ) : (
-                <span>
-                  <SectionTitle>Withdraw Funds</SectionTitle>
-                  <Explanation>
-                    Sorry you didn't win the auction. Please withdraw your
-                    funds.
-                  </Explanation>
-
-                  <ActionButton onClick={() => this.withdrawBalance()}>
-                    Withdraw
-                  </ActionButton>
-                  <Spacer />
-                </span>
+                <Explanation>You haven't placed a bid yet.</Explanation>
               )}
             </ContainerSection>
-          )}
-        </Container>
+            <Line />
+          </span>
+        )}
+        {this.props.statusText === "Live" && (
+          <ContainerSection>
+            <SectionTitle>Place Bid</SectionTitle>
+
+            <SectionData>
+              <BidButton
+                disabled={!this.bidIsValid(this.downBid)}
+                onClick={() => this.updateBid(this.downBid)}
+              >
+                -
+              </BidButton>{" "}
+              {this.newEthBid.toNumber()} ETH{" "}
+              <BidButton
+                disabled={!this.bidIsValid(this.upBid)}
+                onClick={() => this.updateBid(this.upBid)}
+              >
+                +
+              </BidButton>
+            </SectionData>
+            <Spacer />
+            <ActionButton onClick={() => this.submitBid()}>
+              {this.userHasParticipated ? "Another one" : "Place first bid"}
+            </ActionButton>
+            <Spacer />
+          </ContainerSection>
+        )}
+        {this.props.statusText === "Cancelled" && (
+          <ContainerSection>
+            <SectionTitle>Withdraw Funds</SectionTitle>
+
+            {this.userHasParticipated && (
+              <span>
+                <Explanation>
+                  Unfortunately, this auction has been cancelled. Please
+                  withdraw your funds.
+                </Explanation>
+
+                <ActionButton onClick={() => this.withdrawBalance()}>
+                  Withdraw
+                </ActionButton>
+                <Spacer />
+              </span>
+            )}
+          </ContainerSection>
+        )}
+        {this.props.statusText === "Completed" && (
+          <ContainerSection>
+            {this.userIsWinner ? (
+              <span>
+                <SectionTitle>Withdraw Art</SectionTitle>
+                <Explanation>Congratulations, you won the auction!</Explanation>
+
+                <ActionButton onClick={() => this.withdrawBalance()}>
+                  Claim Your Artwork
+                </ActionButton>
+                <Spacer />
+              </span>
+            ) : (
+              <span>
+                <SectionTitle>Withdraw Funds</SectionTitle>
+                <Explanation>
+                  Sorry you didn't win the auction. Please withdraw your funds.
+                </Explanation>
+
+                <ActionButton onClick={() => this.withdrawBalance()}>
+                  Withdraw
+                </ActionButton>
+                <Spacer />
+              </span>
+            )}
+          </ContainerSection>
+        )}
       </Centered>
     );
   }

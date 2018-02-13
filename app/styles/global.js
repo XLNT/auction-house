@@ -6,11 +6,14 @@ injectGlobal`
   body {
     height: 100%;
   }
+  div {
+    box-sizing: border-box;
+  }
   body {
-    background-color: black;
     margin: 0;
     padding: 0;
     font-family: ${sansSerif};
+    background-color: #FFEDE8; 
     line-height: 1.4;
   }
   a {
