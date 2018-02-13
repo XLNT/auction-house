@@ -1,5 +1,5 @@
 export default {
-  blue: "#3366CC",
+  blue: "blue",
   green: "#4CCEAD",
   red: "#CE345C",
   orange: "#ff6600",
@@ -9,5 +9,6 @@ export default {
   lightGrey: "#fafafa",
   white: "#fff",
   yellow: "#fbca04",
-  supreme: "#ee0606"
+  supreme: "#ee0606",
+  lightPink: "#FFEDE8"
 };

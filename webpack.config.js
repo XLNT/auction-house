@@ -51,6 +51,16 @@ module.exports = {
       {
         test: /\.(ico|png|jpe?g|gif)$/,
         use: ["file-loader"]
+      },
+      {
+        test: /\.(otf|eot|svg|ttf|woff|woff2)(\?.+)?$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            limit: 8192,
+            name: "[name].[ext]"
+          }
+        }
       }
     ]
   }
