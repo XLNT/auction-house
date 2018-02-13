@@ -29,8 +29,4 @@ STAGE="development"
 
 Compile and migrate your local smart contracts (both [auction-contracts](https://github.com/xlnt/auction-contracts) and [curator-contracts](https://github.com/xlnt/curator-contracts))
 
-```
-truffle migrate --reset
-```
-
 You can add curator assets and create auctions by using [auction-admin](https://github.com/xlnt/auction-admin).

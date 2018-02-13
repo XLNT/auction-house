@@ -31,6 +31,8 @@ export default class Store {
     CuratorContract.deployed().then(instance => {
       this.curatorInstance = instance;
     });
+
+    window.s = this;
   }
 
   @computed

@@ -87,7 +87,9 @@ export default class Auction extends Component {
 
     const nftData = await curatorInstance.assetData(tokenId, currentBlock);
 
+    console.log("NFT", nftData);
     const data = await ipfsNode.object.data(nftData);
+    console.log(data);
     const jsonData = JSON.parse(data.toString());
 
     this.auction = {

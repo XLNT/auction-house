@@ -63,7 +63,12 @@ module.exports = {
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("production")
+        NODE_ENV: JSON.stringify("production"),
+        PORT: JSON.stringify(process.env.PORT),
+        RPC_HOST: JSON.stringify(process.env.RPC_HOST),
+        RPC_PORT: JSON.stringify(process.env.RPC_PORT),
+        STAGE: JSON.stringify(process.env.STAGE),
+        WEB3_PROVIDER: JSON.stringify(process.env.WEB3_PROVIDER)
       }
     }),
     new webpack.optimize.UglifyJsPlugin({
