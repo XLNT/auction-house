@@ -1,5 +1,5 @@
 export * from "./constants";
-export { sizes as fontSizes, weights as fontWeights } from "./fonts";
+export * from "./fonts";
 export { default as colors } from "./colors";
 export * from "./transforms";
 export * from "./buttons";

@@ -20,11 +20,19 @@ const Window = styled("div")`
   padding: ${basePadding}px;
   color: blue;
   border-radius: 3px;
-  box-shadow: 3px 3px ${lighten("blue", 30)};
+  box-shadow: 3px 3px 3px ${lighten("blue", 40)};
   position: absolute;
   top: ${props => props.top || 0}px;
   left: ${props => props.left || 0}px;
   z-index: ${props => props.zIndex || 1};
+  cursor: move;
+`;
+
+const Close = styled("a")`
+  display: block;
+  position: absolute;
+  top: ${basePadding}px;
+  right: ${basePadding}px;
 `;
 
 @inject("store")
@@ -48,15 +56,18 @@ export default class DesktopWindow extends Component {
           left={this.props.item.left}
           onClick={() => this.handleClick()}
         >
-          <a
+          <Close
             onClick={e => {
               this.closeWindow();
               e.stopPropagation();
             }}
           >
             Close
-          </a>
-          <this.props.item.component {...this.props.item.props} />
+          </Close>
+          <this.props.item.component
+            close={() => this.closeWindow()}
+            {...this.props.item.props}
+          />
           {this.props.children}
         </Window>
       </Draggable>
