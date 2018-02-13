@@ -68,14 +68,15 @@ export default class Store {
 
   @action
   addWindow(item) {
+    const isFirstWindow = this.windows.length == 0;
     const key = item.key;
     let existingWindow = this.windows.filter(obj => obj.key == key)[0];
     if (existingWindow) {
       this.focusWindow(key);
     } else {
       const newParams = {
-        top: Math.random() * 200,
-        left: Math.random() * 300
+        top: isFirstWindow ? 0 : Math.random() * 200,
+        left: isFirstWindow ? 0 : Math.random() * 300
       };
       this.windows.push(Object.assign(item, newParams));
       this.focusWindow(key);
@@ -110,7 +111,6 @@ export default class Store {
       promises.push(this.importAuction(i));
     }
     this.auctions = await Promise.all(promises);
-    console.log("DURATION", this.auctions[0].duration.toNumber());
   }
 
   auctionById(id) {
@@ -131,14 +131,11 @@ export default class Store {
       highestBid,
       highestBidder
     ] = await this.auctionBaseInstance.getAuction(_id, this.currentBlock);
-    console.log("import", tokenId, this.curatorInstance);
     const nftData = await this.curatorInstance.assetData(
       tokenId,
       this.currentBlock
     );
-    console.log("nft", nftData);
     const data = await this.ipfsNode.object.data(nftData);
-    console.log("data", data);
     const jsonData = JSON.parse(data.toString());
     const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
     return {

@@ -21,19 +21,14 @@ import { Line } from "./auction/auction";
 
 import CountDown from "./CountDown";
 
-const ContainerSection = styled("div")`
-  padding: ${basePadding / 2}px ${basePadding / 2}px;
-  display: block;
-`;
-
-const SectionTitle = styled("div")`
+const Title = styled("div")`
   text-transform: uppercase;
   font-size: 16px;
   font-weight: normal;
   color: ${colors.darkGrey};
 `;
 
-const SectionData = styled("div")`
+const Content = styled("div")`
   font-size: 40px;
   font-weight: bold;
 `;
@@ -59,33 +54,7 @@ const BidButton = styled("button")`
   }
 `;
 
-const ActionButton = styled("button")`
-  display: inline-block;
-  background-color: ${colors.white};
-  border: 1px solid ${colors.darkGrey};
-  padding: ${basePadding / 2}px ${basePadding}px;
-  font-size: 20px;
-  cursor: pointer;
-  border-radius: 6px;
-  background-color: black;
-  color: white;
-  text-transform: uppercase;
-
-  &:hover {
-    background-color: ${lighten(`black`, 25)};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-const Explanation = styled("div")`
-  font-size: 16px;
-  padding: ${basePadding / 2}px;
-`;
-
+@inject("auctionStore")
 @inject("store")
 @observer
 export default class AuctionBidBox extends Component {
@@ -100,7 +69,7 @@ export default class AuctionBidBox extends Component {
   }
 
   submitBid() {
-    this.props.bidCallback(this.newBid);
+    this.props.auctionStore.placeBid(this.newBid);
   }
 
   withdrawBalance() {
@@ -114,17 +83,20 @@ export default class AuctionBidBox extends Component {
 
   @computed
   get downBid() {
-    return this.newBid.minus(this.props.bidIncrement);
+    const { bidIncrement } = this.props.auctionStore.auction;
+    return this.newBid.minus(bidIncrement);
   }
 
   @computed
   get upBid() {
-    return this.newBid.plus(this.props.bidIncrement);
+    const { bidIncrement } = this.props.auctionStore.auction;
+    return this.newBid.plus(bidIncrement);
   }
 
   @computed
   get minBid() {
-    return this.props.highestBid.plus(this.props.bidIncrement);
+    const { highestBid, bidIncrement } = this.props.auctionStore.auction;
+    return highestBid.plus(bidIncrement);
   }
 
   @computed
@@ -133,18 +105,9 @@ export default class AuctionBidBox extends Component {
   }
 
   @computed
-  get highestBid() {
-    return this.props.store.web3.fromWei(this.props.highestBid, "ether");
-  }
-
-  @computed
   get currentBid() {
-    return this.props.store.web3.fromWei(this.props.currentAccountBid, "ether");
-  }
-
-  @computed
-  get auctionCompleted() {
-    return this.props.statusText != "Live";
+    const { currentAccountBid } = this.props.auctionStore;
+    return this.props.store.web3.fromWei(currentAccountBid, "ether");
   }
 
   @computed
@@ -154,63 +117,24 @@ export default class AuctionBidBox extends Component {
 
   @computed
   get isFirstBidInAuction() {
-    return this.highestBid.toNumber() == 0;
+    const { highestBid } = this.props.auctionStore.auction;
+    return highestBid.toNumber() == 0;
   }
 
   @computed
   get userIsWinner() {
-    return this.highestBidder == this.props.store.currentAccount;
+    const { highestBidder } = this.props.auctionStore.auction;
+    return highestBidder == this.props.store.currentAccount;
   }
 
   render() {
     return (
-      <Centered>
-        <ContainerSection>
-          <Spacer />
-          <SectionTitle> Time Left</SectionTitle>
-          <CountDown
-            endDate={this.props.endDate}
-            completed={this.auctionCompleted}
-          />
-        </ContainerSection>
-        <Line />
-        {!this.isFirstBidInAuction &&
-          this.statusText !== "Cancelled" && (
-            <span>
-              <ContainerSection>
-                <SectionTitle>Highest Bid</SectionTitle>
-                <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
-              </ContainerSection>
-              <Line />
-            </span>
-          )}
-        {this.statusText !== "Cancelled" && (
-          <span>
-            <ContainerSection>
-              <SectionTitle>Highest Bid</SectionTitle>
-              <SectionData>{this.highestBid.toNumber()} ETH</SectionData>
-            </ContainerSection>
-            <Line />
-          </span>
-        )}
-        {this.statusText !== "Cancelled" && (
-          <span>
-            <ContainerSection>
-              <SectionTitle>Your Bid</SectionTitle>
-              {this.userHasParticipated ? (
-                <SectionData>{this.currentBid.toNumber()} ETH</SectionData>
-              ) : (
-                <Explanation>You haven't placed a bid yet.</Explanation>
-              )}
-            </ContainerSection>
-            <Line />
-          </span>
-        )}
-        {this.props.statusText === "Live" && (
-          <ContainerSection>
-            <SectionTitle>Place Bid</SectionTitle>
+      <div>
+        {this.props.auctionStore.statusIs("Live") && (
+          <div>
+            <Title>Place Bid</Title>
 
-            <SectionData>
+            <Content>
               <BidButton
                 disabled={!this.bidIsValid(this.downBid)}
                 onClick={() => this.updateBid(this.downBid)}
@@ -224,70 +148,57 @@ export default class AuctionBidBox extends Component {
               >
                 +
               </BidButton>
-            </SectionData>
+            </Content>
             <Spacer />
-            <ActionButton onClick={() => this.submitBid()}>
+            <Button onClick={() => this.submitBid()}>
               {this.userHasParticipated ? "Another one" : "Place first bid"}
-            </ActionButton>
+            </Button>
             <Spacer />
-          </ContainerSection>
+          </div>
         )}
-        {this.props.statusText === "Cancelled" && (
-          <ContainerSection>
-            <SectionTitle>Withdraw Funds</SectionTitle>
+        {this.props.auctionStore.statusIs("Cancelled") && (
+          <div>
+            <Title>Withdraw Funds</Title>
 
             {this.userHasParticipated && (
               <span>
-                <Explanation>
+                <Content small>
                   Unfortunately, this auction has been cancelled. Please
                   withdraw your funds.
-                </Explanation>
+                </Content>
 
-                <ActionButton onClick={() => this.withdrawBalance()}>
-                  Withdraw
-                </ActionButton>
+                <Button onClick={() => this.withdrawBalance()}>Withdraw</Button>
                 <Spacer />
               </span>
             )}
-          </ContainerSection>
+          </div>
         )}
-        {this.props.statusText === "Completed" && (
-          <ContainerSection>
+        {this.props.auctionStore.statusIs("Completed") && (
+          <div>
             {this.userIsWinner ? (
               <span>
-                <SectionTitle>Withdraw Art</SectionTitle>
-                <Explanation>Congratulations, you won the auction!</Explanation>
+                <Title>Withdraw Art</Title>
+                <Content small>Congratulations, you won the auction!</Content>
 
-                <ActionButton onClick={() => this.withdrawBalance()}>
+                <Button onClick={() => this.withdrawBalance()}>
                   Claim Your Artwork
-                </ActionButton>
+                </Button>
                 <Spacer />
               </span>
             ) : (
               <span>
-                <SectionTitle>Withdraw Funds</SectionTitle>
-                <Explanation>
+                <Title>Withdraw Funds</Title>
+                <Content small>
                   Sorry you didn't win the auction. Please withdraw your funds.
-                </Explanation>
+                </Content>
 
-                <ActionButton onClick={() => this.withdrawBalance()}>
-                  Withdraw
-                </ActionButton>
+                <Button onClick={() => this.withdrawBalance()}>Withdraw</Button>
                 <Spacer />
               </span>
             )}
-          </ContainerSection>
+          </div>
         )}
-      </Centered>
+      </div>
     );
   }
 }
-
-AuctionBidBox.propTypes = {
-  highestBid: PropTypes.object.isRequired,
-  highestBidder: PropTypes.string.isRequired,
-  bidIncrement: PropTypes.object.isRequired,
-  bidCallback: PropTypes.func.isRequired,
-  withdrawCallback: PropTypes.func.isRequired,
-  statusText: PropTypes.string.isRequired
-};

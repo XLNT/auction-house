@@ -4,8 +4,7 @@ import { action } from "mobx";
 import { Provider, observer } from "mobx-react";
 import createHistory from "history/createBrowserHistory";
 import Header from "./Header";
-import AuctionInfoBox from "./AuctionInfoBox";
-import AuctionBidWindow from "./AuctionBidWindow";
+import Auction from "./Auction";
 import About from "./About";
 import AuctionList from "./AuctionList";
 import MetamaskRequired from "./MetamaskRequired";
@@ -18,7 +17,6 @@ export default class App extends Component {
       "/auction/:auctionId",
       match => {
         this.addAuctionWindow(match.params.auctionId);
-        this.addBidWindow(match.params.auctionId);
       }
     ],
     [
@@ -61,17 +59,8 @@ export default class App extends Component {
 
   addAuctionWindow(id) {
     const newWindow = {
-      key: `auction-info-${id}`,
-      component: AuctionInfoBox,
-      props: { auctionId: id }
-    };
-    this.props.store.addWindow(newWindow);
-  }
-
-  addBidWindow(id) {
-    const newWindow = {
-      key: `auction-bid-${id}`,
-      component: AuctionBidWindow,
+      key: `auction-${id}`,
+      component: Auction,
       props: { auctionId: id }
     };
     this.props.store.addWindow(newWindow);
