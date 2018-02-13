@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { action, autorun, computed, observable, observe, when } from "mobx";
 import BigNumber from "bignumber.js";
-import moment from "moment";
 import AuctionBidBox from "./AuctionBidBox";
 import {
   Wrapper,
@@ -26,6 +25,7 @@ import {
   Description,
   SellerInformation
 } from "./auction/auction";
+import { getEndDate } from "../utils";
 
 @inject("store")
 @observer
@@ -171,10 +171,8 @@ export default class Auction extends Component {
   @computed
   get endDate() {
     const { duration, startedAt } = this.auction;
-    // duration is in block numbers
-    const startDate = moment.unix(startedAt.toString());
-    const endDate = startDate.add(duration.toNumber() * 14, "seconds");
-    return endDate.toDate();
+    // duration is in block numbers (avg 14 seconds each)
+    return getEndDate(startedAt.toString(), duration.toNumber() * 14);
   }
 
   render() {

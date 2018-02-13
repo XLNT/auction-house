@@ -23,7 +23,7 @@ import {
 } from "./auction/auction";
 import CountDown from "./CountDown";
 import test from "../images/test.png";
-import moment from "moment";
+import { getEndDate } from "../utils";
 
 @inject("store")
 @observer
@@ -132,10 +132,8 @@ export default class Home extends Component {
   }
 
   endDate({ duration, startedAt }) {
-    // duration is in block numbers
-    const startDate = moment.unix(startedAt.toString());
-    const endDate = startDate.add(duration.toNumber() * 14, "seconds");
-    return endDate.toDate();
+    // duration is in block numbers (avg 14 seconds each)
+    return getEndDate(startedAt.toString(), duration.toNumber() * 14);
   }
 
   render() {
