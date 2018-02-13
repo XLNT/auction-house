@@ -32,7 +32,7 @@ export default class AuctionStore {
   }
 
   statusIs(statusString) {
-    return statusString == this.statusText;
+    return statusString === this.statusText;
   }
 
   @computed
@@ -42,7 +42,7 @@ export default class AuctionStore {
 
   @computed
   get userIsHighestBidder() {
-    return this.auction.highestBidder == this.store.currentAccount;
+    return this.auction.highestBidder === this.store.currentAccount;
   }
 
   @action
@@ -72,10 +72,7 @@ export default class AuctionStore {
       from: this.store.currentAccount,
       value: adjustedBid
     };
-    const receipt = await writeOnlyAuctionBaseInstance.bid(
-      this.auctionId,
-      params
-    );
+    await writeOnlyAuctionBaseInstance.bid(this.auctionId, params);
   }
 
   @action
@@ -84,9 +81,6 @@ export default class AuctionStore {
     const params = {
       from: this.store.currentAccount
     };
-    const receipt = await writeOnlyAuctionBaseInstance.withdrawBalance(
-      this.auctionId,
-      params
-    );
+    await writeOnlyAuctionBaseInstance.withdrawBalance(this.auctionId, params);
   }
 }

@@ -2,14 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import styled from "react-emotion";
-import {
-  Wrapper,
-  headerHeight,
-  basePadding,
-  colors,
-  FloatRight,
-  Spacer
-} from "../styles";
+import { headerHeight, basePadding, FloatRight, Spacer } from "../styles";
 import logo from "../images/logo-blue.svg";
 
 const HeaderContainer = styled("div")`

@@ -1,14 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import {
-  Spacer,
-  Divider,
-  colors,
-  Button,
-  basePadding,
-  lighten
-} from "../styles";
-import CountDown from "./CountDown";
+import { Spacer, colors } from "../styles";
 import styled, { keyframes } from "react-emotion";
 
 function pulseBuilder() {
@@ -75,7 +67,7 @@ export default class AuctionInfo extends Component {
           {statusText}{" "}
           <StatusPulse
             color={this.statusColor(auction.status)}
-            active={statusText == "Live"}
+            active={statusText === "Live"}
           />
         </Status>
         <Spacer size={0.5} />

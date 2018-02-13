@@ -22,9 +22,6 @@ export default class Store {
   @observable curatorInstance = null;
   @observable auctions = [];
   @observable auctionsLength = new BigNumber(0);
-  @observable showBidBox = false;
-  @observable showAuctionsList = false;
-  @observable showAbout = false;
   @observable windows = [];
   @observable topZ = 1;
 
@@ -38,24 +35,40 @@ export default class Store {
     // Setup read only AuctionBase contract
     const AuctionBaseContract = contract(AuctionBase);
     AuctionBaseContract.setProvider(readOnlyWeb3.currentProvider);
-    AuctionBaseContract.deployed().then(instance => {
-      this.readOnlyAuctionBaseInstance = instance;
-    });
+    AuctionBaseContract.deployed()
+      .then(instance => {
+        this.readOnlyAuctionBaseInstance = instance;
+        return instance;
+      })
+      .catch(err => {
+        console.log(err);
+      });
 
     // Setup write only AuctionBase contract
     AuctionBaseContract.setProvider(writeOnlyWeb3.currentProvider);
-    AuctionBaseContract.deployed().then(instance => {
-      this.writeOnlyAuctionBaseInstance = instance;
-    });
+    AuctionBaseContract.deployed()
+      .then(instance => {
+        this.writeOnlyAuctionBaseInstance = instance;
+        return instance;
+      })
+      .catch(err => {
+        console.log(err);
+      });
 
     // Setup Curator contract
     const CuratorContract = contract(Curator);
     CuratorContract.setProvider(readOnlyWeb3.currentProvider);
-    CuratorContract.deployed().then(instance => {
-      this.curatorInstance = instance;
-    });
+    CuratorContract.deployed()
+      .then(instance => {
+        this.curatorInstance = instance;
+        return instance;
+      })
+      .catch(err => {
+        console.log(err);
+      });
 
-    const readyWatcher = when(
+    // Watch isReady
+    when(
       () => this.isReady,
       () => {
         this.setWatchers();
@@ -69,16 +82,15 @@ export default class Store {
       this.currentAccount &&
       this.currentBlock &&
       this.curatorInstance &&
-      this.readOnlyAuctionBaseInstance &&
-      this.writeOnlyAuctionBaseInstance
+      this.readOnlyAuctionBaseInstance
     );
   }
 
   @action
   addWindow(item) {
-    const isFirstWindow = this.windows.length == 0;
+    const isFirstWindow = this.windows.length === 0;
     const key = item.key;
-    let existingWindow = this.windows.filter(obj => obj.key == key)[0];
+    let existingWindow = this.windows.filter(obj => obj.key === key)[0];
     if (existingWindow) {
       this.focusWindow(key);
     } else {
@@ -94,14 +106,14 @@ export default class Store {
   @action
   focusWindow(key) {
     const newZ = this.topZ + 1;
-    const existingWindow = this.windows.filter(obj => obj.key == key)[0];
+    const existingWindow = this.windows.filter(obj => obj.key === key)[0];
     extendObservable(existingWindow, { z: newZ });
     this.topZ = newZ;
   }
 
   @action
   removeWindow(key) {
-    this.windows = this.windows.filter(obj => obj.key != key);
+    this.windows = this.windows.filter(obj => obj.key !== key);
   }
 
   // Getters
@@ -113,7 +125,7 @@ export default class Store {
   }
 
   async getAuctions() {
-    if (this.auctionsLength == 0) return false;
+    if (this.auctionsLength === 0) return false;
     const promises = [];
     for (let i = 0; i < this.auctionsLength; i++) {
       promises.push(this.importAuction(i));
@@ -122,7 +134,7 @@ export default class Store {
   }
 
   auctionById(id) {
-    return this.auctions.filter(auction => auction.id == id)[0];
+    return this.auctions.filter(auction => auction.id.equals(id))[0];
   }
 
   async importAuction(_id) {
@@ -171,7 +183,7 @@ export default class Store {
     this.blockWatcher = observe(
       this,
       "currentBlock",
-      change => {
+      () => {
         this.getAuctionsLength();
       },
       true
@@ -180,7 +192,7 @@ export default class Store {
     this.auctionsLengthWatcher = observe(
       this,
       "auctionsLength",
-      change => {
+      () => {
         this.getAuctions();
       },
       true
@@ -191,6 +203,9 @@ export default class Store {
     this.web3.eth.getAccounts(
       action((error, accounts) => {
         this.currentAccount = accounts[0];
+        if (error) {
+          console.log("Error", "setCurrentAccount", error);
+        }
       })
     );
   }
@@ -198,6 +213,9 @@ export default class Store {
   setCurrentNetwork() {
     this.web3.version.getNetwork((error, network) => {
       this.currentNetwork = network;
+      if (error) {
+        console.log("Error", "setCurrentNetwork", error);
+      }
     });
   }
 
@@ -207,6 +225,9 @@ export default class Store {
       action((error, result) => {
         if (result.number !== this.currentBlock) {
           this.currentBlock = result.number;
+        }
+        if (error) {
+          console.log("Error", "setCurrentBlock", error);
         }
       })
     );

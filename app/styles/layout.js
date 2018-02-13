@@ -24,7 +24,7 @@ export const Spacer = styled("div")`
 
 export const Wrapper = styled("div")`
   width: 95%;
-  // max-width: ${screenWidth}px;
+  max-width: ${screenWidth}px;
   margin: auto;
 `;
 

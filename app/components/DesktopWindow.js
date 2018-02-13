@@ -1,14 +1,7 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { withRouter } from "react-router-dom";
-import {
-  Spacer,
-  Divider,
-  colors,
-  Button,
-  basePadding,
-  lighten
-} from "../styles";
+import { basePadding, lighten } from "../styles";
 import styled from "react-emotion";
 import Draggable from "react-draggable";
 

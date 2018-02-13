@@ -13,7 +13,7 @@ injectGlobal`
     margin: 0;
     padding: 0;
     font-family: ${sansSerif};
-    background-color: #FFEDE8; 
+    background-color: ${colors.lightPink}; 
     line-height: 1.4;
   }
   a {

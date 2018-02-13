@@ -1,18 +1,9 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
 import { inject, observer } from "mobx-react";
 import { observable, action, runInAction, computed } from "mobx";
 import styled from "react-emotion";
 import BigNumber from "bignumber.js";
-import {
-  Spacer,
-  Centered,
-  basePadding,
-  colors,
-  lighten,
-  Button
-} from "../styles";
-import CountDown from "./CountDown";
+import { Spacer, lighten, Button } from "../styles";
 import { Title, Content } from "./Auction";
 
 const BidButton = styled("button")`
@@ -136,7 +127,7 @@ export default class AuctionBidBox extends Component {
         )}
         {this.props.auctionStore.statusIs("Completed") && (
           <div>
-            {this.userIsHighestBidder ? (
+            {userIsHighestBidder ? (
               <span>
                 <Title>Withdraw Art</Title>
                 <Content small>Congratulations, you won the auction!</Content>

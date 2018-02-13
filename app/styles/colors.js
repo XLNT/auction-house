@@ -9,5 +9,6 @@ export default {
   lightGrey: "#fafafa",
   white: "#fff",
   yellow: "#fbca04",
-  supreme: "#ee0606"
+  supreme: "#ee0606",
+  lightPink: "#FFEDE8"
 };
