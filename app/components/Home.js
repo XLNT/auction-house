@@ -23,6 +23,7 @@ import {
 } from "./auction/auction";
 import CountDown from "./CountDown";
 import test from "../images/test.png";
+import { getEndDate } from "../utils";
 
 @inject("store")
 @observer
@@ -103,6 +104,7 @@ export default class Home extends Component {
       highestBid,
       highestBidder
     ] = await readOnlyAuctionBaseInstance.getAuction(_id, currentBlock);
+    const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
     return {
       id,
       nftAddress,
@@ -114,7 +116,8 @@ export default class Home extends Component {
       startBlock,
       status,
       highestBid,
-      highestBidder
+      highestBidder,
+      endDate
     };
   }
 
@@ -158,7 +161,7 @@ export default class Home extends Component {
               }
             </Description>
             <Divider padded={1.5} />
-            <CountDown endDate={new Date().getTime() + 100000000} />
+            <CountDown endDate={auctionOfInterest.endDate} />
             <Spacer />
             <Link to={`/auction/${auctionOfInterest.id.toString()}`}>
               <Button>View</Button>

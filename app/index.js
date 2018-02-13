@@ -19,14 +19,15 @@ let web3Provided;
 let store;
 
 window.onload = () => {
-  const host = process.env.RPC_HOST || "127.0.0.1";
-  const port = process.env.RPC_PORT || 7545;
-
   const readOnlyWeb3Provider = process.env.WEB3_PROVIDER
     ? new Web3(new Web3.providers.HttpProvider(process.env.WEB3_PROVIDER))
-    : new Web3(new Web3.providers.HttpProvider(`${host}:${port}`));
+    : new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+
   const writeOnlyWeb3Provider =
     typeof web3 !== "undefined" ? new Web3(web3.currentProvider) : undefined;
+
+  console.log(readOnlyWeb3Provider.currentProvider);
+  console.log(writeOnlyWeb3Provider.currentProvider);
 
   store = new Store(readOnlyWeb3Provider, writeOnlyWeb3Provider);
 

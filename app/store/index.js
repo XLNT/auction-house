@@ -21,20 +21,20 @@ export default class Store {
 
     // Setup read only AuctionBase contract
     const AuctionBaseContract = contract(AuctionBase);
-    AuctionBaseContract.setProvider(this.readOnlyWeb3.currentProvider);
+    AuctionBaseContract.setProvider(readOnlyWeb3.currentProvider);
     AuctionBaseContract.deployed().then(instance => {
       this.readOnlyAuctionBaseInstance = instance;
     });
 
     // Setup write only AuctionBase contract
-    AuctionBaseContract.setProvider(this.writeOnlyWeb3.currentProvider);
+    AuctionBaseContract.setProvider(writeOnlyWeb3.currentProvider);
     AuctionBaseContract.deployed().then(instance => {
       this.writeOnlyAuctionBaseInstance = instance;
     });
 
     // Setup Curator contract
     const CuratorContract = contract(Curator);
-    CuratorContract.setProvider(this.readOnlyWeb3.currentProvider);
+    CuratorContract.setProvider(readOnlyWeb3.currentProvider);
     CuratorContract.deployed().then(instance => {
       this.curatorInstance = instance;
     });
