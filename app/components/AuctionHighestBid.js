@@ -4,18 +4,7 @@ import { computed } from "mobx";
 import BigNumber from "bignumber.js";
 import { colors } from "../styles";
 import styled from "react-emotion";
-
-const Title = styled("div")`
-  text-transform: uppercase;
-  font-size: 16px;
-  font-weight: normal;
-  color: ${colors.darkGrey};
-`;
-
-const Content = styled("div")`
-  font-size: 40px;
-  font-weight: bold;
-`;
+import { Title, Content } from "./Auction";
 
 @inject("auctionStore")
 @inject("store")

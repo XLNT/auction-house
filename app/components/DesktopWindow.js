@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
+import { withRouter } from "react-router-dom";
 import {
   Spacer,
   Divider,
@@ -35,6 +36,7 @@ const Close = styled("a")`
   right: ${basePadding}px;
 `;
 
+@withRouter
 @inject("store")
 @observer
 export default class DesktopWindow extends Component {
@@ -43,11 +45,10 @@ export default class DesktopWindow extends Component {
   }
 
   handleClick() {
-    this.props.store.focusWindow(this.props.item.key);
+    this.props.history.push(`/${this.props.item.key}`);
   }
 
   render() {
-    console.log(this.props);
     return (
       <Draggable>
         <Window

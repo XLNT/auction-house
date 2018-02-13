@@ -35,7 +35,7 @@ export default class Desktop extends Component {
 
   render() {
     const { isReady, windows } = this.props.store;
-    if (!isReady) return <div />;
+    if (!isReady) return <div />; // TODO: make pretty
     return (
       <div>
         <Header />

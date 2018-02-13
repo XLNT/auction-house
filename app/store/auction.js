@@ -40,6 +40,11 @@ export default class AuctionStore {
     return this.currentAccountBid > 0;
   }
 
+  @computed
+  get userIsHighestBidder() {
+    return this.auction.highestBidder == this.store.currentAccount;
+  }
+
   @action
   async getCurrentAccountBid() {
     const {

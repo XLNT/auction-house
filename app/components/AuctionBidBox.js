@@ -13,18 +13,7 @@ import {
   Button
 } from "../styles";
 import CountDown from "./CountDown";
-
-const Title = styled("div")`
-  text-transform: uppercase;
-  font-size: 16px;
-  font-weight: normal;
-  color: ${colors.darkGrey};
-`;
-
-const Content = styled("div")`
-  font-size: 40px;
-  font-weight: bold;
-`;
+import { Title, Content } from "./Auction";
 
 const BidButton = styled("button")`
   display: inline-block;
@@ -61,14 +50,6 @@ export default class AuctionBidBox extends Component {
     return newBid.gte(this.minBid);
   }
 
-  submitBid() {
-    this.props.auctionStore.placeBid(this.newBid);
-  }
-
-  withdrawBalance() {
-    this.props.withdrawCallback();
-  }
-
   @action
   updateBid(newBid) {
     this.newBid = newBid;
@@ -97,30 +78,11 @@ export default class AuctionBidBox extends Component {
     return this.props.store.web3.fromWei(this.newBid, "ether");
   }
 
-  @computed
-  get currentBid() {
-    const { currentAccountBid } = this.props.auctionStore;
-    return this.props.store.web3.fromWei(currentAccountBid, "ether");
-  }
-
-  @computed
-  get userHasParticipated() {
-    return this.currentBid.toNumber() != 0;
-  }
-
-  @computed
-  get isFirstBidInAuction() {
-    const { highestBid } = this.props.auctionStore.auction;
-    return highestBid.toNumber() == 0;
-  }
-
-  @computed
-  get userIsWinner() {
-    const { highestBidder } = this.props.auctionStore.auction;
-    return highestBidder == this.props.store.currentAccount;
-  }
-
   render() {
+    const {
+      userHasParticipated,
+      userIsHighestBidder
+    } = this.props.auctionStore;
     return (
       <div>
         {this.props.auctionStore.statusIs("Live") && (
@@ -143,8 +105,10 @@ export default class AuctionBidBox extends Component {
               </BidButton>
             </Content>
             <Spacer />
-            <Button onClick={() => this.submitBid()}>
-              {this.userHasParticipated ? "Another one" : "Place first bid"}
+            <Button
+              onClick={() => this.props.auctionStore.placeBid(this.newBid)}
+            >
+              {userHasParticipated ? "Another one" : "Place first bid"}
             </Button>
             <Spacer />
           </div>
@@ -153,14 +117,18 @@ export default class AuctionBidBox extends Component {
           <div>
             <Title>Withdraw Funds</Title>
 
-            {this.userHasParticipated && (
+            {userHasParticipated && (
               <span>
                 <Content small>
                   Unfortunately, this auction has been cancelled. Please
                   withdraw your funds.
                 </Content>
 
-                <Button onClick={() => this.withdrawBalance()}>Withdraw</Button>
+                <Button
+                  onClick={() => this.props.auctionStore.withdrawBalance()}
+                >
+                  Withdraw
+                </Button>
                 <Spacer />
               </span>
             )}
@@ -168,12 +136,14 @@ export default class AuctionBidBox extends Component {
         )}
         {this.props.auctionStore.statusIs("Completed") && (
           <div>
-            {this.userIsWinner ? (
+            {this.userIsHighestBidder ? (
               <span>
                 <Title>Withdraw Art</Title>
                 <Content small>Congratulations, you won the auction!</Content>
 
-                <Button onClick={() => this.withdrawBalance()}>
+                <Button
+                  onClick={() => this.props.auctionStore.withdrawBalance()}
+                >
                   Claim Your Artwork
                 </Button>
                 <Spacer />
@@ -185,7 +155,11 @@ export default class AuctionBidBox extends Component {
                   Sorry you didn't win the auction. Please withdraw your funds.
                 </Content>
 
-                <Button onClick={() => this.withdrawBalance()}>Withdraw</Button>
+                <Button
+                  onClick={() => this.props.auctionStore.withdrawBalance()}
+                >
+                  Withdraw
+                </Button>
                 <Spacer />
               </span>
             )}

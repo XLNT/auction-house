@@ -59,7 +59,7 @@ export default class App extends Component {
 
   addAuctionWindow(id) {
     const newWindow = {
-      key: `auction-${id}`,
+      key: `auction/${id}`,
       component: Auction,
       props: { auctionId: id }
     };

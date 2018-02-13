@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { observable } from "mobx";
 import styled from "react-emotion";
 
-import { Wrapper, Spacer, Centered } from "../styles";
+import { Spacer, Centered } from "../styles";
 
 const Heading = styled("div")`
   font-size: 64px;
@@ -111,14 +111,12 @@ export default class About extends Component {
 
   render() {
     return (
-      <Wrapper>
-        <Centered>
-          <Spacer size={5} />
-          <Heading>XLNT 🎉 is</Heading>
-          <Spacer size={2} />
-          <Description>{this.message}</Description>
-        </Centered>
-      </Wrapper>
+      <Centered>
+        <Spacer size={5} />
+        <Heading>XLNT 🎉 is</Heading>
+        <Spacer size={2} />
+        <Description>{this.message}</Description>
+      </Centered>
     );
   }
 }

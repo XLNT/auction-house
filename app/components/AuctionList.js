@@ -27,7 +27,12 @@ export default class AuctionList extends Component {
             return (
               <div key={auction.id.toString()}>
                 {auction.id.toString()}.{" "}
-                <a onClick={() => this.navigateTo(`/auction/${auction.id}`)}>
+                <a
+                  onClick={e => {
+                    this.navigateTo(`/auction/${auction.id}`);
+                    e.stopPropagation();
+                  }}
+                >
                   <strong>{metadata.name}</strong> by {metadata.creator}
                 </a>
               </div>

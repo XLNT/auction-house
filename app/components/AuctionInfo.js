@@ -27,7 +27,7 @@ const Status = styled("div")`
   font-weight: 400;
   text-transform: uppercase;
   display: inline-block;
-  color: ${colors.green};
+  color: ${props => (props.color ? props.color : colors.black)};
 `;
 
 const StatusPulse = styled("div")`
@@ -71,11 +71,11 @@ export default class AuctionInfo extends Component {
     const { auction, statusText } = this.props.auctionStore;
     return (
       <div>
-        <Status>
+        <Status color={this.statusColor(auction.status)}>
           {statusText}{" "}
           <StatusPulse
-            active={statusText == "Live"}
             color={this.statusColor(auction.status)}
+            active={statusText == "Live"}
           />
         </Status>
         <Spacer size={0.5} />
