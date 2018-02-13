@@ -33,7 +33,7 @@ export default class AuctionList extends Component {
   async componentDidMount() {
     const { auctionId } = this.props.match.params;
     this.auctionBaseWatcher = when(
-      () => this.props.store.auctionBaseInstance,
+      () => this.props.store.readOnlyAuctionBaseInstance,
       () => {
         this.getAuctionsLength();
         this.blockWatcher = observe(
@@ -67,8 +67,8 @@ export default class AuctionList extends Component {
   }
 
   async getAuctionsLength() {
-    const { auctionBaseInstance } = this.props.store;
-    this.auctionsLength = await auctionBaseInstance.getAuctionsCount(
+    const { readOnlyAuctionBaseInstance } = this.props.store;
+    this.auctionsLength = await readOnlyAuctionBaseInstance.getAuctionsCount(
       {},
       this.props.store.currentBlock
     );
@@ -78,7 +78,7 @@ export default class AuctionList extends Component {
     const {
       currentBlock,
       currentAccount,
-      auctionBaseInstance
+      readOnlyAuctionBaseInstance
     } = this.props.store;
     if (this.auctionsLength == 0) return false;
     const promises = [];
@@ -91,7 +91,7 @@ export default class AuctionList extends Component {
   async importAuction(_id) {
     const {
       currentBlock,
-      auctionBaseInstance,
+      readOnlyAuctionBaseInstance,
       curatorInstance,
       ipfsNode
     } = this.props.store;
@@ -107,7 +107,7 @@ export default class AuctionList extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+    ] = await readOnlyAuctionBaseInstance.getAuction(_id, currentBlock);
     const nftData = await curatorInstance.assetData(tokenId, currentBlock);
     const { value } = await ipfsNode.dag.get(nftData);
     return {

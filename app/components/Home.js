@@ -34,7 +34,7 @@ export default class Home extends Component {
   async componentDidMount() {
     const { auctionId } = this.props.match.params;
     this.auctionBaseWatcher = when(
-      () => this.props.store.auctionBaseInstance,
+      () => this.props.store.readOnlyAuctionBaseInstance,
       () => {
         this.getAuctionsLength();
         this.blockWatcher = observe(
@@ -68,8 +68,8 @@ export default class Home extends Component {
   }
 
   async getAuctionsLength() {
-    const { auctionBaseInstance } = this.props.store;
-    this.auctionsLength = await auctionBaseInstance.getAuctionsCount(
+    const { readOnlyAuctionBaseInstance } = this.props.store;
+    this.auctionsLength = await readOnlyAuctionBaseInstance.getAuctionsCount(
       {},
       this.props.store.currentBlock
     );
@@ -79,7 +79,7 @@ export default class Home extends Component {
     const {
       currentBlock,
       currentAccount,
-      auctionBaseInstance
+      readOnlyAuctionBaseInstance
     } = this.props.store;
     if (this.auctionsLength == 0) return false;
     const promises = [];
@@ -90,7 +90,7 @@ export default class Home extends Component {
   }
 
   async importAuction(_id) {
-    const { currentBlock, auctionBaseInstance } = this.props.store;
+    const { currentBlock, readOnlyAuctionBaseInstance } = this.props.store;
     const [
       id,
       nftAddress,
@@ -103,7 +103,7 @@ export default class Home extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+    ] = await readOnlyAuctionBaseInstance.getAuction(_id, currentBlock);
     const endDate = getEndDate(startedAt.toString(), duration.toNumber() * 14);
     return {
       id,

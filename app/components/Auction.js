@@ -33,12 +33,11 @@ export default class Auction extends Component {
   @observable auction = undefined;
   @observable loadingAuction = true;
   @observable currentAccountBid = new BigNumber(0);
-  @observable hideOwnBidWarning = false;
 
   async componentDidMount() {
     const { auctionId } = this.props.match.params;
     this.auctionBaseWatcher = when(
-      () => this.props.store.auctionBaseInstance,
+      () => this.props.store.readOnlyAuctionBaseInstance,
       () => {
         this.blockWatcher = observe(
           this.props.store,
@@ -67,7 +66,7 @@ export default class Auction extends Component {
   async getAuction(_id) {
     this.loadingAuction = true;
     const {
-      auctionBaseInstance,
+      readOnlyAuctionBaseInstance,
       currentBlock,
       curatorInstance,
       ipfsNode
@@ -84,10 +83,9 @@ export default class Auction extends Component {
       status,
       highestBid,
       highestBidder
-    ] = await auctionBaseInstance.getAuction(_id, currentBlock);
+    ] = await readOnlyAuctionBaseInstance.getAuction(_id, currentBlock);
 
     const nftData = await curatorInstance.assetData(tokenId, currentBlock);
-
     const data = await ipfsNode.object.data(nftData);
     const jsonData = JSON.parse(data.toString());
 
@@ -115,7 +113,7 @@ export default class Auction extends Component {
   @action
   async getCurrentAccountBid(_id) {
     const {
-      auctionBaseInstance,
+      readOnlyAuctionBaseInstance,
       currentAccount,
       currentBlock
     } = this.props.store;
@@ -123,7 +121,7 @@ export default class Auction extends Component {
       this.currentAccountBid = new BigNumber(0);
       return false;
     }
-    this.currentAccountBid = await auctionBaseInstance.getBid(
+    this.currentAccountBid = await readOnlyAuctionBaseInstance.getBid(
       _id,
       currentAccount,
       {},
@@ -133,23 +131,25 @@ export default class Auction extends Component {
 
   @action
   async placeBid(bigNumber) {
-    const { auctionBaseInstance } = this.props.store;
+    const { writeOnlyAuctionBaseInstance } = this.props.store;
     const adjustedBid = bigNumber.minus(this.currentAccountBid);
     const params = {
       from: this.props.store.currentAccount,
       value: adjustedBid
     };
-    const receipt = await auctionBaseInstance.bid(this.auction.id, params);
-    this.hideOwnBidWarning = false;
+    const receipt = await writeOnlyAuctionBaseInstance.bid(
+      this.auction.id,
+      params
+    );
   }
 
   @action
   async withdrawBalance() {
-    const { auctionBaseInstance } = this.props.store;
+    const { writeOnlyAuctionBaseInstance } = this.props.store;
     const params = {
       from: this.props.store.currentAccount
     };
-    const receipt = await auctionBaseInstance.withdrawBalance(
+    const receipt = await writeOnlyAuctionBaseInstance.withdrawBalance(
       this.auction.id,
       params
     );
