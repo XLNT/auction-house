@@ -24,6 +24,7 @@ export default class Store {
   @observable auctionsLength = new BigNumber(0);
   @observable windows = [];
   @observable topZ = 1;
+  @observable bgAuctionId = null;
 
   constructor(readOnlyWeb3, writeOnlyWeb3) {
     this.web3 = readOnlyWeb3;
@@ -101,6 +102,17 @@ export default class Store {
       this.windows.push(Object.assign(item, newParams));
       if (focus) this.focusWindow(key);
     }
+  }
+
+  @computed
+  get backgroundAuction() {
+    if (!this.bgAuctionId) return null;
+    return this.auctionById(this.bgAuctionId);
+  }
+
+  @action
+  setBackgroundImageId(id) {
+    this.bgAuctionId = id;
   }
 
   @action

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Router, matchPath } from "react-router-dom";
+import { action } from "mobx";
 import { Provider } from "mobx-react";
 import createHistory from "history/createBrowserHistory";
 import Auction from "./Auction";
@@ -51,12 +52,15 @@ export default class App extends Component {
     });
   }
 
+  @action
   addAuctionWindow(id) {
     const newWindow = {
       key: `auction/${id}`,
       component: Auction,
       props: { auctionId: id }
     };
+    console.log("addAuctionWindow", id);
+    this.props.store.setBackgroundImageId(id);
     this.props.store.addWindow(newWindow);
   }
 

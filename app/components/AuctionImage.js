@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
+import { computed } from "mobx";
 import { Spacer, fontSizes, fontWeights, colors, Text } from "../styles";
 import styled, { keyframes } from "react-emotion";
-import hero from "../images/Miriam.jpg";
 
 const Hero = styled("img")`
   position: fixed;
@@ -16,7 +16,16 @@ const Hero = styled("img")`
 @inject("store")
 @observer
 export default class AuctionImage extends Component {
+  @computed
+  get backgroundSrc() {
+    const { backgroundAuction } = this.props.store;
+    if (!backgroundAuction) return null;
+    return `https://ipfs.io/ipfs/${
+      backgroundAuction.nftMetadata.resourceIdentifiers.default
+    }`;
+  }
+
   render() {
-    return <Hero src={hero} />;
+    return <Hero src={this.backgroundSrc} />;
   }
 }
