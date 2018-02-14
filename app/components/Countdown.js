@@ -3,11 +3,6 @@ import { inject, observer } from "mobx-react";
 import { action, observable, computed } from "mobx";
 import styled from "react-emotion";
 
-const Timer = styled("div")`
-  font-size: 40px;
-  font-weight: bold;
-`;
-
 @inject("store")
 @observer
 export default class Countdown extends Component {
@@ -64,7 +59,7 @@ export default class Countdown extends Component {
 
   render() {
     return (
-      <Timer>
+      <div>
         {this.completed || this.props.completed ? (
           <span> 00 : 00 : 00 : 00 </span>
         ) : (
@@ -72,7 +67,7 @@ export default class Countdown extends Component {
             {this.days} : {this.hours} : {this.minutes} : {this.seconds}
           </span>
         )}
-      </Timer>
+      </div>
     );
   }
 }

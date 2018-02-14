@@ -4,15 +4,7 @@ import styled from "react-emotion";
 import hero from "../images/Miriam.jpg";
 import Header from "./Header";
 import DesktopWindow from "./DesktopWindow";
-
-const Hero = styled("img")`
-  position: fixed;
-  display: block;
-  width: 90%;
-  top: 40px;
-  left: 400px;
-  z-index: -1;
-`;
+import AuctionImage from "./AuctionImage";
 
 const Container = styled("div")`
   position: relative;
@@ -30,7 +22,7 @@ export default class Desktop extends Component {
         <Container>
           {windows.map(item => <DesktopWindow key={item.key} item={item} />)}
         </Container>
-        <Hero src={hero} />
+        <AuctionImage />
       </div>
     );
   }

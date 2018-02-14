@@ -6,25 +6,14 @@ import BigNumber from "bignumber.js";
 import { Spacer, lighten, Button } from "../styles";
 import { Title, Content } from "./Auction";
 
-const BidButton = styled("button")`
-  display: inline-block;
-  background-color: black;
-  color: white;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  transform: translateY(-8px);
-  font-size: 16px;
-
-  &:hover {
-    background-color: ${lighten("black", 25)};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+const BidButton = styled(Button)`
+  font-size: 0.6em;
+  vertical-align: top;
+  width: auto;
+  line-height: 2;
+  height: auto;
+  padding: 0;
+  width: 2em;
 `;
 
 @inject("auctionStore")
@@ -79,7 +68,7 @@ export default class AuctionBidBox extends Component {
         {this.props.auctionStore.statusIs("Live") && (
           <div>
             <Title>Place Bid</Title>
-
+            <Spacer size={0.5} />
             <Content>
               <BidButton
                 disabled={!this.bidIsValid(this.downBid)}
@@ -99,9 +88,8 @@ export default class AuctionBidBox extends Component {
             <Button
               onClick={() => this.props.auctionStore.placeBid(this.newBid)}
             >
-              {userHasParticipated ? "Another one" : "Place first bid"}
+              {userHasParticipated ? "Place another bid" : "Place first bid"}
             </Button>
-            <Spacer />
           </div>
         )}
         {this.props.auctionStore.statusIs("Cancelled") && (
@@ -120,7 +108,6 @@ export default class AuctionBidBox extends Component {
                 >
                   Withdraw
                 </Button>
-                <Spacer />
               </span>
             )}
           </div>
@@ -151,7 +138,6 @@ export default class AuctionBidBox extends Component {
                 >
                   Withdraw
                 </Button>
-                <Spacer />
               </span>
             )}
           </div>
