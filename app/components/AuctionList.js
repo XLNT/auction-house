@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { withRouter } from "react-router-dom";
-import { Heading, Spacer } from "../styles";
+import { Text, Spacer } from "../styles";
 
 @withRouter
 @inject("store")
@@ -15,9 +15,9 @@ export default class AuctionList extends Component {
     const { auctions, auctionsLength } = this.props.store;
     return (
       <div>
-        <Heading>
+        <Text>
           XLNT Drops <small>{auctionsLength.toString()} TOTAL</small>
-        </Heading>
+        </Text>
         <Spacer />
         <div>
           {auctions.map(auction => {

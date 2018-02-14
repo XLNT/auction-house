@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { Spacer, colors } from "../styles";
+import { Spacer, fontSizes, fontWeights, colors, Text } from "../styles";
 import styled, { keyframes } from "react-emotion";
 
 function pulseBuilder() {
   const pulse = keyframes`
     0% { -webkit-transform: scale(0) }
     100% {
-      -webkit-transform: scale(0.75);
+      -webkit-transform: scale(1.25);
       opacity: 50;
     }
   `;
@@ -31,12 +31,6 @@ const StatusPulse = styled("div")`
   border-radius: 100%;
   animation:  ${props =>
     props.active && `${pulseBuilder()} 1.5s infinite ease-in-out`};
-`;
-
-const Heading = styled("span")`
-  font-size: 40px;
-  font-weight: 600;
-  display: inline-block;
 `;
 
 const SellerInformation = styled("div")`
@@ -63,28 +57,27 @@ export default class AuctionInfo extends Component {
     const { auction, statusText } = this.props.auctionStore;
     return (
       <div>
-        <Status color={this.statusColor(auction.status)}>
-          {statusText}{" "}
-          <StatusPulse
-            color={this.statusColor(auction.status)}
-            active={statusText === "Live"}
-          />
-        </Status>
+        <div>
+          <Text size={fontSizes.small} grey uppercase inline>
+            Auction #{auction.id.toString()}
+          </Text>
+          <Spacer inline size={0.5} />
+          <Status color={this.statusColor(auction.status)}>
+            {statusText}{" "}
+            <StatusPulse
+              color={this.statusColor(auction.status)}
+              active={statusText === "Live"}
+            />
+          </Status>
+        </div>
         <Spacer size={0.5} />
-
-        <div>Auction #{auction.id.toString()}</div>
-        <Heading>{auction.nftMetadata.name}</Heading>
-        <SellerInformation>
-          Created by {auction.nftMetadata.creator}
-        </SellerInformation>
+        <Text size={fontSizes.bigger}>{auction.nftMetadata.name}</Text>
         <Spacer size={0.5} />
-
-        <Description>
-          <div>
-            NFT: {auction.tokenId.toString()}@{auction.nftAddress}
-          </div>
-          <div>{auction.nftMetadata.decription}</div>
-        </Description>
+        <Text grey weight={fontWeights.normal}>
+          Created by <strong>{auction.nftMetadata.creator}</strong>
+          <Spacer inline size={0.5} />
+          <a>Read more about this</a>
+        </Text>
       </div>
     );
   }

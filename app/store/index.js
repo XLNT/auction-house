@@ -24,6 +24,7 @@ export default class Store {
   @observable auctionsLength = new BigNumber(0);
   @observable windows = [];
   @observable topZ = 1;
+  @observable bgAuctionId = null;
 
   constructor(readOnlyWeb3, writeOnlyWeb3) {
     this.web3 = readOnlyWeb3;
@@ -87,20 +88,40 @@ export default class Store {
   }
 
   @action
-  addWindow(item) {
+  addWindow(item, focus = true) {
     const isFirstWindow = this.windows.length === 0;
     const key = item.key;
     let existingWindow = this.windows.filter(obj => obj.key === key)[0];
     if (existingWindow) {
-      this.focusWindow(key);
+      if (focus) this.focusWindow(key);
     } else {
       const newParams = {
         top: isFirstWindow ? 0 : Math.random() * 200,
         left: isFirstWindow ? 0 : Math.random() * 300
       };
       this.windows.push(Object.assign(item, newParams));
-      this.focusWindow(key);
+      if (focus) this.focusWindow(key);
     }
+  }
+
+  @computed
+  get backgroundAuction() {
+    if (!this.bgAuctionId) return null;
+    return this.auctionById(this.bgAuctionId);
+  }
+
+  @action
+  setBackgroundImageId(id) {
+    this.bgAuctionId = id;
+  }
+
+  @action
+  addWindows(items) {
+    // Only focus last window
+    items.forEach((item, i) => {
+      const lastWindow = i + 1 === items.length;
+      this.addWindow(item, lastWindow);
+    });
   }
 
   @action

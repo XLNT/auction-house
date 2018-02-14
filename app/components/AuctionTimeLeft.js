@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
+import { Title, Content } from "./Auction";
 import CountDown from "./CountDown";
 
 @inject("auctionStore")
@@ -9,7 +10,10 @@ export default class AuctionTimeLeft extends Component {
     const { auction } = this.props.auctionStore;
     return (
       <div>
-        <CountDown endDate={auction.endDate} />
+        <Title>Time left</Title>
+        <Content>
+          <CountDown endDate={auction.endDate} />
+        </Content>
       </div>
     );
   }

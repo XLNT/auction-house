@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { inject, observer, Provider } from "mobx-react";
 import styled from "react-emotion";
-import { Divider, colors } from "../styles";
+import { Divider, colors, fontSizes, Text, Spacer } from "../styles";
 import AuctionStore from "../store/auction";
 import AuctionInfo from "./AuctionInfo";
 import AuctionTimeLeft from "./AuctionTimeLeft";
@@ -9,17 +9,31 @@ import AuctionBidBox from "./AuctionBidBox";
 import AuctionHighestBid from "./AuctionHighestBid";
 import AuctionYourBid from "./AuctionYourBid";
 
-export const Title = styled("div")`
-  text-transform: uppercase;
-  font-size: 16px;
-  font-weight: normal;
-  color: ${colors.darkGrey};
+const AuctionFlex = styled("div")`
+  display: flex;
 `;
 
-export const Content = styled("div")`
-  font-size: 40px;
-  font-weight: bold;
+const FlexItem = styled("div")`
+  flex-basis: 50%;
 `;
+
+export class Title extends Component {
+  render() {
+    return (
+      <div>
+        <Text size={fontSizes.small} grey uppercase inline>
+          {this.props.children}
+        </Text>
+      </div>
+    );
+  }
+}
+
+export class Content extends Component {
+  render() {
+    return <Text size={fontSizes.bigger}>{this.props.children}</Text>;
+  }
+}
 
 @inject("store")
 @observer
@@ -37,11 +51,14 @@ export default class Auction extends Component {
           <div>
             <AuctionInfo />
             <Divider padded />
-            <AuctionTimeLeft />
-            <Divider padded />
-            <AuctionHighestBid />
-            <Divider padded />
-            <AuctionYourBid />
+            <AuctionFlex>
+              <FlexItem>
+                <AuctionTimeLeft />
+              </FlexItem>
+              <FlexItem>
+                <AuctionHighestBid />
+              </FlexItem>
+            </AuctionFlex>
             <Divider padded />
             <AuctionBidBox />
           </div>

@@ -1,5 +1,11 @@
 import styled from "react-emotion";
-import { colors, basePadding, transform, lighten } from "../styles";
+import {
+  colors,
+  basePadding,
+  fontWeights,
+  transform,
+  lighten
+} from "../styles";
 
 export const Button = styled("button")`
   display: inline-block;
@@ -10,6 +16,8 @@ export const Button = styled("button")`
   box-shadow: 2px 2px ${colors.black};
   cursor: pointer;
   border-radius: 3px;
+  text-align: center;
+  font-weight: ${fontWeights.bold};
 
   &:hover {
     background-color: ${lighten(colors.yellow, 45)};
